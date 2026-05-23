@@ -4,7 +4,6 @@ import * as CANNON from 'cannon-es'
 const CAR_MAX_SPEED = 30
 const STEER_FORCE = 18
 const FORWARD_FORCE = 5000
-const TURBO_MULT = 1.6
 
 export default class Car {
   constructor() {
@@ -80,11 +79,12 @@ export default class Car {
     // para refletir a velocidade real após a integração física deste frame.
     const speed = this.speed
 
-    const forceMult = turbo ? TURBO_MULT : 1
-    this.body.applyLocalForce(
-      new CANNON.Vec3(0, 0, -FORWARD_FORCE * forceMult),
-      new CANNON.Vec3(0, 0, 0)
-    )
+    if (turbo) {
+      this.body.applyLocalForce(
+        new CANNON.Vec3(0, 0, -FORWARD_FORCE),
+        new CANNON.Vec3(0, 0, 0)
+      )
+    }
 
     // Steering (torque em Y) — força proporcional à velocidade
     const steerStrength = Math.min(speed / CAR_MAX_SPEED, 1) * STEER_FORCE

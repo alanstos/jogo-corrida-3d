@@ -171,6 +171,7 @@ export default class Game {
       cancelAnimationFrame(this.animFrameId)
       this.animFrameId = null
     }
+    this.controls.destroy()
     if (this.phase) {
       this.phase.dispose()
       this.phase = null
