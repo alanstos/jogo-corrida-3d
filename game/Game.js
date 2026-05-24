@@ -4,6 +4,7 @@ import Car from './Car.js';
 import Controls from './Controls.js';
 import Track from './Track.js';
 import Camera from './Camera.js';
+import HUD from './HUD.js';
 
 export default class Game {
   /**
@@ -57,6 +58,9 @@ export default class Game {
     this.car = new Car(this.scene, this.physicsWorld);
     this.controls = new Controls();
     this.track = new Track(this.scene, this.physicsWorld);
+
+    // --- HUD ---
+    this.hud = new HUD();
 
     // --- Wire collision handler ---
     this.car.onCollide((event) => this._handleCarCollision(event));
@@ -178,7 +182,8 @@ export default class Game {
     this.car.applyInput(intent);
 
     // Step 7: track update BEFORE world.step — obstacle bodies must be positioned before step
-    this.track.update(safeDt, 1.0);
+    // Pass car Z so recycling stays relative to car position (car moves in -Z over time)
+    this.track.update(safeDt, 1.0, this.car.body.position.z);
 
     // Step 8: step physics
     this.physicsWorld.step(safeDt);
@@ -191,6 +196,9 @@ export default class Game {
 
     // Step 10: camera follow AFTER syncMesh — needs current mesh world position
     this.camera.follow(this.car.mesh, safeDt);
+
+    // HUD update — after camera, before render
+    this.hud.update({ score: this.score, speed: this.track.getSpeed() });
 
     // Step 11: render LAST
     this.renderer.render(this.scene, this.camera.instance);

@@ -1,65 +1,62 @@
 export default class Controls {
   constructor() {
-    // Internal state — updated by event listeners
-    this._state = {
-      left: false,
-      right: false,
-      forward: false,
-    };
-
+    this._keyState = { left: false, right: false, forward: false };
+    this._activePointers = new Map();
     this._bindKeyboard();
+    this._bindTouch();
   }
 
   _bindKeyboard() {
-    const keyMap = {
-      ArrowUp:    'forward',
-      KeyW:       'forward',
-      ArrowLeft:  'left',
-      KeyA:       'left',
-      ArrowRight: 'right',
-      KeyD:       'right',
-    };
-
-    const onKeyDown = (e) => {
-      const action = keyMap[e.code];
-      if (action) {
-        e.preventDefault();
-        this._state[action] = true;
-      }
-    };
-
-    const onKeyUp = (e) => {
-      const action = keyMap[e.code];
-      if (action) {
-        this._state[action] = false;
-      }
-    };
-
-    // Bind on window so focus on canvas is not required
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-
-    // Store refs for cleanup
-    this._keydownHandler = onKeyDown;
-    this._keyupHandler = onKeyUp;
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A')  this._keyState.left = true;
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this._keyState.right = true;
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')    this._keyState.forward = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A')  this._keyState.left = false;
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this._keyState.right = false;
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')    this._keyState.forward = false;
+    });
   }
 
-  /**
-   * Returns a snapshot copy of the current intent.
-   * Callers must not mutate the returned object.
-   * @returns {{ left: boolean, right: boolean, forward: boolean }}
-   */
+  _bindTouch() {
+    const left = document.getElementById('btnLeft');
+    const right = document.getElementById('btnRight');
+    if (left)  this._bindButton(left, 'left');
+    if (right) this._bindButton(right, 'right');
+  }
+
+  _bindButton(el, dir) {
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      this._activePointers.set(e.pointerId, dir);
+      el.classList.add('pressed');
+    });
+    const release = (e) => {
+      if (this._activePointers.get(e.pointerId) === dir) {
+        this._activePointers.delete(e.pointerId);
+      }
+      const stillHeld = Array.from(this._activePointers.values()).includes(dir);
+      if (!stillHeld) el.classList.remove('pressed');
+    };
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+    el.addEventListener('pointerleave', release);
+  }
+
   getIntent() {
+    const touchLeft  = Array.from(this._activePointers.values()).includes('left');
+    const touchRight = Array.from(this._activePointers.values()).includes('right');
     return {
-      left:    this._state.left,
-      right:   this._state.right,
-      forward: this._state.forward,
+      left:    this._keyState.left  || touchLeft,
+      right:   this._keyState.right || touchRight,
+      forward: this._keyState.forward,
     };
   }
 
   destroy() {
-    window.removeEventListener('keydown', this._keydownHandler);
-    window.removeEventListener('keyup', this._keyupHandler);
-    this._state = { left: false, right: false, forward: false };
+    this._keyState = { left: false, right: false, forward: false };
+    this._activePointers.clear();
   }
 }

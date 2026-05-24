@@ -19,6 +19,7 @@ export default class Track {
     this._elapsedTime = 0;
     this._scrollSpeed = 20; // units/sec — ramps in update()
     this._spawnTimer = 0;
+    this._distanceTraveled = 0;
 
     this._segments = [];
     this._obstacles = [];
@@ -47,22 +48,30 @@ export default class Track {
   }
 
   _buildLateralEdges() {
-    // Neon cyan edge lines — purely visual, static (TRACK-03)
-    const totalLength = SEGMENT_COUNT * SEGMENT_LENGTH;
-    const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, totalLength);
+    // Pool of short edge segments — same count/length as road segments, recycle identically
+    const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, SEGMENT_LENGTH);
     const edgeMat = new THREE.MeshLambertMaterial({
       color: 0x00ffff,
       emissive: new THREE.Color(0x00ffff),
       emissiveIntensity: 0.4,
     });
 
-    const leftEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    leftEdge.position.set(-5, 0.25, -totalLength / 2);
-    this._scene.add(leftEdge);
+    this._leftEdges = [];
+    this._rightEdges = [];
 
-    const rightEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    rightEdge.position.set(5, 0.25, -totalLength / 2);
-    this._scene.add(rightEdge);
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const z = -i * SEGMENT_LENGTH;
+
+      const left = new THREE.Mesh(edgeGeo, edgeMat);
+      left.position.set(-5, 0.25, z);
+      this._scene.add(left);
+      this._leftEdges.push(left);
+
+      const right = new THREE.Mesh(edgeGeo, edgeMat);
+      right.position.set(5, 0.25, z);
+      this._scene.add(right);
+      this._rightEdges.push(right);
+    }
   }
 
   _buildObstaclePool() {
@@ -109,22 +118,35 @@ export default class Track {
   // ---------------------------------------------------------------
 
   /**
-   * @param {number} deltaTime  - seconds since last frame
+   * @param {number} deltaTime      - seconds since last frame
    * @param {number} speedMultiplier - 1.0 default; hook for difficulty selector (Phase 2)
+   * @param {number} carZ           - car's current world Z position for position-relative recycling
    */
-  update(deltaTime, speedMultiplier = 1.0) {
-    // Progressive speed ramp (TRACK-04): starts at 20, ramps at 1.2/s, capped at +60 = 80 max
+  update(deltaTime, speedMultiplier = 1.0, carZ = 0) {
+    // Progressive speed ramp (TRACK-04): starts at 20, ramps at 0.5/s, capped at +40 = 60 max
     this._elapsedTime += deltaTime;
-    this._scrollSpeed = (20 + Math.min(this._elapsedTime * 1.2, 60)) * speedMultiplier;
+    this._scrollSpeed = (20 + Math.min(this._elapsedTime * 0.5, 40)) * speedMultiplier;
 
     const scrollDelta = this._scrollSpeed * deltaTime;
+    this._distanceTraveled += scrollDelta;
 
-    // --- Scroll road segments --- (TRACK-01 — pooled recycling, no allocation)
-    for (let i = 0; i < this._segments.length; i++) {
+    // --- Scroll road segments + edge segments --- (TRACK-01 — pooled recycling, no allocation)
+    const recycleThreshold = carZ + SEGMENT_LENGTH;
+    const recycleOffset = SEGMENT_COUNT * SEGMENT_LENGTH;
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
       this._segments[i].position.z += scrollDelta;
-      // Recycle: segment passed behind the car — move it to the far end
-      if (this._segments[i].position.z > SEGMENT_LENGTH) {
-        this._segments[i].position.z -= SEGMENT_COUNT * SEGMENT_LENGTH;
+      if (this._segments[i].position.z > recycleThreshold) {
+        this._segments[i].position.z -= recycleOffset;
+      }
+
+      this._leftEdges[i].position.z += scrollDelta;
+      if (this._leftEdges[i].position.z > recycleThreshold) {
+        this._leftEdges[i].position.z -= recycleOffset;
+      }
+
+      this._rightEdges[i].position.z += scrollDelta;
+      if (this._rightEdges[i].position.z > recycleThreshold) {
+        this._rightEdges[i].position.z -= recycleOffset;
       }
     }
 
@@ -136,8 +158,8 @@ export default class Track {
       obs.body.position.z += scrollDelta;
       obs.mesh.position.copy(obs.body.position);
 
-      // Deactivate when obstacle scrolls past the camera
-      if (obs.body.position.z > SEGMENT_LENGTH) {
+      // Deactivate relative to car — obstacle has passed behind the car
+      if (obs.body.position.z > carZ + SEGMENT_LENGTH) {
         this._deactivateObstacle(obs);
       }
     }
@@ -147,11 +169,11 @@ export default class Track {
     this._spawnTimer += deltaTime;
     if (this._spawnTimer >= spawnInterval) {
       this._spawnTimer = 0;
-      this._trySpawnObstacle();
+      this._trySpawnObstacle(carZ);
     }
   }
 
-  _trySpawnObstacle() {
+  _trySpawnObstacle(carZ = 0) {
     // Find an inactive obstacle from the pool
     const obs = this._obstacles.find((o) => !o.active);
     if (!obs) return; // pool exhausted — skip this spawn
@@ -160,8 +182,8 @@ export default class Track {
     const lanes = [-3, 0, 3];
     const laneX = lanes[Math.floor(Math.random() * lanes.length)];
 
-    // Spawn at far end of track, just within visible range
-    const spawnZ = -(SEGMENT_COUNT * SEGMENT_LENGTH) + 10;
+    // Spawn at far end of track ahead of the car
+    const spawnZ = carZ - (SEGMENT_COUNT * SEGMENT_LENGTH) + 10;
 
     obs.body.position.set(laneX, 0.75, spawnZ);
     obs.body.velocity.set(0, 0, 0);
@@ -188,10 +210,14 @@ export default class Track {
     this._elapsedTime = 0;
     this._scrollSpeed = 20;
     this._spawnTimer = 0;
+    this._distanceTraveled = 0;
 
-    // Reset segment positions to initial layout
-    for (let i = 0; i < this._segments.length; i++) {
-      this._segments[i].position.z = -i * SEGMENT_LENGTH;
+    // Reset segment and edge positions to initial layout
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const z = -i * SEGMENT_LENGTH;
+      this._segments[i].position.z = z;
+      this._leftEdges[i].position.z = z;
+      this._rightEdges[i].position.z = z;
     }
 
     // Deactivate all obstacles
@@ -201,10 +227,16 @@ export default class Track {
   }
 
   /**
+   * Returns current scroll speed as integer (used by HUD).
+   * @returns {number}
+   */
+  getSpeed() { return Math.floor(this._scrollSpeed); }
+
+  /**
    * Returns cumulative distance traveled (used for score calculation in Game).
    * @returns {number}
    */
   getDistanceTraveled() {
-    return this._elapsedTime * this._scrollSpeed;
+    return this._distanceTraveled;
   }
 }
