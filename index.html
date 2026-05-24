@@ -2,108 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#1a0033" />
   <title>RETRO RACER 3D</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <!-- ======================== TELA: MENU ======================== -->
-  <div id="screen-menu" class="screen active">
-    <div id="logo" class="glitch" data-text="RETRO RACER 3D">RETRO RACER 3D</div>
-    <div id="subtitle">ARCADE RACING</div>
-
-    <div id="difficulty-selector">
-      <button class="diff-btn" data-diff="easy">🟢 FÁCIL</button>
-      <button class="diff-btn active" data-diff="medium">🟡 MÉDIO</button>
-      <button class="diff-btn" data-diff="hard">🔴 DIFÍCIL</button>
-    </div>
-
-    <button id="btn-start" class="btn-primary">▶ INICIAR</button>
-    <button id="btn-records" class="btn-secondary">★ RECORDES</button>
-
-    <div id="records-panel" hidden>
-      <h2 class="panel-title">── MELHORES ──</h2>
-      <div class="record-row">
-        <span class="record-label">PONTUAÇÃO</span>
-        <span class="record-value" id="rec-score">---</span>
-      </div>
-      <div class="record-row">
-        <span class="record-label">TEMPO</span>
-        <span class="record-value" id="rec-time">---</span>
-      </div>
-      <div class="record-row">
-        <span class="record-label">FASES</span>
-        <span class="record-value"><span id="rec-phases">0</span>/3</span>
-      </div>
-      <button id="btn-reset-records" class="btn-danger">RESETAR</button>
-    </div>
-  </div>
-
-  <!-- ======================== TELA: JOGO ======================== -->
-  <div id="screen-game" class="screen hidden">
-    <canvas id="game-canvas"></canvas>
-
-    <!-- HUD injetado dinamicamente pelo HUD.js -->
-    <div id="hud" hidden>
-      <div id="hud-top">
-        <span id="hud-lap">LAP 0/0</span>
-        <span id="hud-phase">FASE 1</span>
-        <span id="hud-score">0</span>
-      </div>
-      <div id="hud-bottom">
-        <div id="hud-speed-container">
-          <span id="hud-speed">0</span>
-          <span id="hud-speed-unit">KM/H</span>
-        </div>
-        <span id="hud-timer">0:00.00</span>
-      </div>
-    </div>
-
-    <!-- Controles mobile -->
-    <div id="mobile-controls">
-      <button class="ctrl-btn" data-action="left" aria-label="Esquerda">◀</button>
-      <button class="ctrl-btn ctrl-center" data-action="turbo" aria-label="Turbo">■</button>
-      <button class="ctrl-btn" data-action="right" aria-label="Direita">▶</button>
-    </div>
-  </div>
-
-  <!-- ======================== TELA: RESULTADOS ======================== -->
-  <div id="screen-results" class="screen hidden">
-    <h2 id="result-title">FIM DE FASE</h2>
-    <div id="result-stars">
-      <span class="star" id="star-1">★</span>
-      <span class="star" id="star-2">★</span>
-      <span class="star" id="star-3">★</span>
-    </div>
-    <div class="result-row">
-      <span class="result-label">PONTOS</span>
-      <span class="result-value" id="result-score">0</span>
-    </div>
-    <div class="result-row">
-      <span class="result-label">TEMPO</span>
-      <span class="result-value" id="result-time">0:00</span>
-    </div>
-    <div id="result-buttons">
-      <button id="btn-next" class="btn-primary">▶ PRÓXIMA FASE</button>
-      <button id="btn-retry" class="btn-secondary">↺ REPETIR</button>
-      <button id="btn-menu" class="btn-secondary">⌂ MENU</button>
-    </div>
-  </div>
-
-  <!-- Overlay: girar celular -->
-  <div id="portrait-overlay">
-    <div id="portrait-msg">
-      <div id="portrait-icon">📱</div>
-      <p>GIRE O CELULAR</p>
-      <p>PARA JOGAR</p>
-    </div>
-  </div>
-
+  <canvas id="gameCanvas"></canvas>
   <script type="module" src="/main.js"></script>
 </body>
 </html>
