@@ -19,6 +19,7 @@ export default class Track {
     this._elapsedTime = 0;
     this._scrollSpeed = 20; // units/sec — ramps in update()
     this._spawnTimer = 0;
+    this._distanceTraveled = 0;
 
     this._segments = [];
     this._obstacles = [];
@@ -113,11 +114,12 @@ export default class Track {
    * @param {number} speedMultiplier - 1.0 default; hook for difficulty selector (Phase 2)
    */
   update(deltaTime, speedMultiplier = 1.0) {
-    // Progressive speed ramp (TRACK-04): starts at 20, ramps at 1.2/s, capped at +60 = 80 max
+    // Progressive speed ramp (TRACK-04): starts at 20, ramps at 0.5/s, capped at +40 = 60 max
     this._elapsedTime += deltaTime;
-    this._scrollSpeed = (20 + Math.min(this._elapsedTime * 1.2, 60)) * speedMultiplier;
+    this._scrollSpeed = (20 + Math.min(this._elapsedTime * 0.5, 40)) * speedMultiplier;
 
     const scrollDelta = this._scrollSpeed * deltaTime;
+    this._distanceTraveled += scrollDelta;
 
     // --- Scroll road segments --- (TRACK-01 — pooled recycling, no allocation)
     for (let i = 0; i < this._segments.length; i++) {
@@ -188,6 +190,7 @@ export default class Track {
     this._elapsedTime = 0;
     this._scrollSpeed = 20;
     this._spawnTimer = 0;
+    this._distanceTraveled = 0;
 
     // Reset segment positions to initial layout
     for (let i = 0; i < this._segments.length; i++) {
@@ -211,6 +214,6 @@ export default class Track {
    * @returns {number}
    */
   getDistanceTraveled() {
-    return this._elapsedTime * this._scrollSpeed;
+    return this._distanceTraveled;
   }
 }
