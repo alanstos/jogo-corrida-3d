@@ -48,22 +48,30 @@ export default class Track {
   }
 
   _buildLateralEdges() {
-    // Neon cyan edge lines — purely visual, static (TRACK-03)
-    const totalLength = SEGMENT_COUNT * SEGMENT_LENGTH;
-    const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, totalLength);
+    // Pool of short edge segments — same count/length as road segments, recycle identically
+    const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, SEGMENT_LENGTH);
     const edgeMat = new THREE.MeshLambertMaterial({
       color: 0x00ffff,
       emissive: new THREE.Color(0x00ffff),
       emissiveIntensity: 0.4,
     });
 
-    const leftEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    leftEdge.position.set(-5, 0.25, -totalLength / 2);
-    this._scene.add(leftEdge);
+    this._leftEdges = [];
+    this._rightEdges = [];
 
-    const rightEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    rightEdge.position.set(5, 0.25, -totalLength / 2);
-    this._scene.add(rightEdge);
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const z = -i * SEGMENT_LENGTH;
+
+      const left = new THREE.Mesh(edgeGeo, edgeMat);
+      left.position.set(-5, 0.25, z);
+      this._scene.add(left);
+      this._leftEdges.push(left);
+
+      const right = new THREE.Mesh(edgeGeo, edgeMat);
+      right.position.set(5, 0.25, z);
+      this._scene.add(right);
+      this._rightEdges.push(right);
+    }
   }
 
   _buildObstaclePool() {
@@ -122,12 +130,23 @@ export default class Track {
     const scrollDelta = this._scrollSpeed * deltaTime;
     this._distanceTraveled += scrollDelta;
 
-    // --- Scroll road segments --- (TRACK-01 — pooled recycling, no allocation)
-    for (let i = 0; i < this._segments.length; i++) {
+    // --- Scroll road segments + edge segments --- (TRACK-01 — pooled recycling, no allocation)
+    const recycleThreshold = carZ + SEGMENT_LENGTH;
+    const recycleOffset = SEGMENT_COUNT * SEGMENT_LENGTH;
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
       this._segments[i].position.z += scrollDelta;
-      // Recycle relative to car — segment has passed behind the car
-      if (this._segments[i].position.z > carZ + SEGMENT_LENGTH) {
-        this._segments[i].position.z -= SEGMENT_COUNT * SEGMENT_LENGTH;
+      if (this._segments[i].position.z > recycleThreshold) {
+        this._segments[i].position.z -= recycleOffset;
+      }
+
+      this._leftEdges[i].position.z += scrollDelta;
+      if (this._leftEdges[i].position.z > recycleThreshold) {
+        this._leftEdges[i].position.z -= recycleOffset;
+      }
+
+      this._rightEdges[i].position.z += scrollDelta;
+      if (this._rightEdges[i].position.z > recycleThreshold) {
+        this._rightEdges[i].position.z -= recycleOffset;
       }
     }
 
@@ -193,9 +212,12 @@ export default class Track {
     this._spawnTimer = 0;
     this._distanceTraveled = 0;
 
-    // Reset segment positions to initial layout
-    for (let i = 0; i < this._segments.length; i++) {
-      this._segments[i].position.z = -i * SEGMENT_LENGTH;
+    // Reset segment and edge positions to initial layout
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const z = -i * SEGMENT_LENGTH;
+      this._segments[i].position.z = z;
+      this._leftEdges[i].position.z = z;
+      this._rightEdges[i].position.z = z;
     }
 
     // Deactivate all obstacles
