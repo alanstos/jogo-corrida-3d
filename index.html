@@ -9,6 +9,16 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Game-Over overlay — hidden by default, shown on state=GAME_OVER -->
+  <div id="gameOver" class="overlay hidden" aria-hidden="true">
+    <div class="overlay-inner">
+      <h1 class="go-title">GAME OVER</h1>
+      <p class="go-score">SCORE: <span id="goScoreValue">0</span></p>
+      <button id="retryButton" type="button">RETRY</button>
+    </div>
+  </div>
+
   <script type="module" src="/main.js"></script>
 </body>
 </html>

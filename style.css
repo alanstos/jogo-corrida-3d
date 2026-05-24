@@ -13,3 +13,67 @@ html, body {
   height: 100vh;
   touch-action: none;
 }
+
+/* ---------------------------------------------------------------
+   Game-Over overlay
+   --------------------------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 0, 51, 0.85);
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.go-title {
+  margin: 0;
+  color: #ff2255;
+  font-family: monospace;
+  font-size: 48px;
+  text-shadow: 0 0 12px #ff2255;
+  letter-spacing: 4px;
+}
+
+.go-score {
+  margin: 0;
+  color: #00ffff;
+  font-family: monospace;
+  font-size: 24px;
+  text-shadow: 0 0 8px #00ffff;
+}
+
+#retryButton {
+  background: #ffee00;
+  color: #1a0033;
+  border: none;
+  padding: 20px 40px;
+  font-family: monospace;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  touch-action: none;
+  /* Mobile tap target requirements — FEATURES.md */
+  min-width: 200px;
+  min-height: 80px;
+  box-shadow: 0 0 16px #ffee00;
+}
+
+#retryButton:active {
+  transform: scale(0.95);
+}
