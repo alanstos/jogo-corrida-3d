@@ -13,6 +13,12 @@ export default class PhysicsWorld {
     // Global sleep OK — overridden per-body for the car (car uses allowSleep: false)
     this.world.allowSleep = true;
 
+    // Friction=0 on default contact so applyLocalForce actually moves the car.
+    // High default friction (0.3) creates a ~3000N resistive force that cancels
+    // the 2500N drive force entirely — car stays visually stationary.
+    this.world.defaultContactMaterial.friction = 0;
+    this.world.defaultContactMaterial.restitution = 0.0;
+
     this._addGroundPlane();
   }
 
