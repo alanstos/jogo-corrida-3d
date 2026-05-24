@@ -1,127 +1,90 @@
-import * as THREE from 'three'
-import * as CANNON from 'cannon-es'
-
-const CAR_MAX_SPEED = 30
-const STEER_FORCE = 18
-const FORWARD_FORCE = 5000
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 
 export default class Car {
-  constructor() {
-    this._wheels = []
-    this._steerAngle = 0
-    this.speed = 0
-    this.mesh = this._buildMesh()
-    this.body = this._buildBody()
-  }
+  /**
+   * @param {THREE.Scene} scene
+   * @param {import('./PhysicsWorld.js').default} physicsWorld
+   */
+  constructor(scene, physicsWorld) {
+    this._scene = scene;
+    this._physicsWorld = physicsWorld;
 
-  _buildMesh() {
-    const group = new THREE.Group()
+    this.body = this._buildBody();
+    this.mesh = this._buildMesh();
 
-    // Carroceria principal (~120 tris)
-    const bodyGeo = new THREE.BoxGeometry(1.6, 0.7, 3.2)
-    const bodyMat = new THREE.MeshToonMaterial({ color: 0xff2255 })
-    const body = new THREE.Mesh(bodyGeo, bodyMat)
-    body.position.y = 0.55
-    group.add(body)
+    // Add physics body to world
+    physicsWorld.addBody(this.body);
 
-    // Cabine (teto)
-    const cabineGeo = new THREE.BoxGeometry(1.2, 0.55, 1.8)
-    const cabineMat = new THREE.MeshToonMaterial({ color: 0xcc1144 })
-    const cabine = new THREE.Mesh(cabineGeo, cabineMat)
-    cabine.position.set(0, 1.15, -0.1)
-    group.add(cabine)
+    // Add mesh to scene
+    scene.add(this.mesh);
 
-    // Rodas (4x ~80 tris = ~320 tris total)
-    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.35, 10)
-    const wheelMat = new THREE.MeshToonMaterial({ color: 0x111111 })
-    const wheelPositions = [
-      [-0.92, 0.38, 1.1],
-      [0.92, 0.38, 1.1],
-      [-0.92, 0.38, -1.1],
-      [0.92, 0.38, -1.1],
-    ]
-    wheelPositions.forEach(([x, y, z]) => {
-      const wheel = new THREE.Mesh(wheelGeo, wheelMat)
-      wheel.rotation.z = Math.PI / 2
-      wheel.position.set(x, y, z)
-      group.add(wheel)
-      this._wheels.push(wheel)
-    })
-
-    // Detalhe neon (para-choque ciano)
-    const bumperGeo = new THREE.BoxGeometry(1.5, 0.12, 0.12)
-    const bumperMat = new THREE.MeshToonMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 0.8 })
-    const bumper = new THREE.Mesh(bumperGeo, bumperMat)
-    bumper.position.set(0, 0.55, 1.65)
-    group.add(bumper)
-
-    return group
+    // Diagnostic — verify mass, type, allowSleep before any input is wired
+    // PITFALLS #4: mass=0 -> static, type=2. Expected: mass=150, type=1 (DYNAMIC), allowSleep=false
+    console.log('Car init:', {
+      mass: this.body.mass,
+      type: this.body.type,
+      allowSleep: this.body.allowSleep,
+    });
   }
 
   _buildBody() {
+    // PITFALLS #4: mass MUST be > 0. mass:0 = static body, forces have no effect.
+    // PITFALLS #1: allowSleep MUST be false — sleeping bodies ignore applyLocalForce silently.
     const body = new CANNON.Body({
-      mass: 500,
-      shape: new CANNON.Box(new CANNON.Vec3(0.8, 0.5, 1.6)),
+      mass: 150,
+      shape: new CANNON.Box(new CANNON.Vec3(0.9, 0.4, 2.0)),
       linearDamping: 0.3,
       angularDamping: 0.9,
-    })
-    body.position.set(0, 0.9, 0)
-    body.allowSleep = false // carro nunca dorme — evita freeze da física
-    return body
+      allowSleep: false,
+    });
+
+    // Spawn above ground so it drops cleanly onto the ground plane
+    body.position.set(0, 1.0, 0);
+
+    return body;
   }
 
-  addToWorld(world) {
-    world.addBody(this.body)
+  _buildMesh() {
+    // Cyan neon car mesh — MeshLambertMaterial (no PBR, PERF-03)
+    const group = new THREE.Group();
+    const geo = new THREE.BoxGeometry(1.8, 0.8, 4.0);
+    const mat = new THREE.MeshLambertMaterial({ color: 0x00ffff });
+    const bodyMesh = new THREE.Mesh(geo, mat);
+    group.add(bodyMesh);
+    return group;
   }
 
-  steer(left, right, turbo, delta) {
-    // Nota: this.speed é atualizado externamente em Game.update() APÓS o fixedStep,
-    // para refletir a velocidade real após a integração física deste frame.
-    const speed = this.speed
+  /**
+   * Apply input forces to the physics body.
+   * MUST be called BEFORE physicsWorld.step() in the game loop.
+   * @param {{ forward: boolean, left: boolean, right: boolean }} intent
+   */
+  applyInput(intent) {
+    // PITFALLS #1: defensive wakeUp() guard — body may have been manually put to sleep
+    this.body.wakeUp();
 
-    if (turbo) {
+    if (intent.forward) {
+      // PITFALLS #2: applyLocalForce keeps direction correct after any rotation.
+      // applyForce (world space) would break propulsion after rotation.
+      // -Z is forward in local space (Three.js / Cannon-es convention)
       this.body.applyLocalForce(
-        new CANNON.Vec3(0, 0, -FORWARD_FORCE),
-        new CANNON.Vec3(0, 0, 0)
-      )
+        new CANNON.Vec3(0, 0, -2500),
+        new CANNON.Vec3(0, 0, 0) // center of mass
+      );
     }
 
-    // Steering (torque em Y) — força proporcional à velocidade
-    const steerStrength = Math.min(speed / CAR_MAX_SPEED, 1) * STEER_FORCE
-    if (left) this.body.angularVelocity.y = Math.min(this.body.angularVelocity.y + steerStrength * delta * 3, 1.5)
-    if (right) this.body.angularVelocity.y = Math.max(this.body.angularVelocity.y - steerStrength * delta * 3, -1.5)
-
-    // Limitar velocidade máxima
-    if (speed > CAR_MAX_SPEED) {
-      const ratio = CAR_MAX_SPEED / speed
-      this.body.velocity.x *= ratio
-      this.body.velocity.z *= ratio
-    }
-
-    // Animação das rodas
-    const wheelRot = speed * delta * 0.8
-    this._wheels.forEach(w => { w.rotation.x += wheelRot })
+    // Steering via torque on Y axis
+    if (intent.left)  this.body.torque.y += 400;
+    if (intent.right) this.body.torque.y -= 400;
   }
 
+  /**
+   * Copy physics body transform to Three.js mesh.
+   * MUST be called AFTER physicsWorld.step() in the game loop — PITFALLS #6.
+   */
   syncMesh() {
-    this.mesh.position.copy(this.body.position)
-    this.mesh.quaternion.copy(this.body.quaternion)
-  }
-
-  getMesh() {
-    return this.mesh
-  }
-
-  setPosition(x, y, z) {
-    this.mesh.position.set(x, y, z)
-    this.body.position.set(x, y, z)
-    this.body.velocity.set(0, 0, 0)
-    this.body.angularVelocity.set(0, 0, 0)
-    this.speed = 0
-    this.body.wakeUp() // garantir que o corpo está ativo após reposicionamento
-  }
-
-  getPosition() {
-    return this.mesh.position
+    this.mesh.position.copy(this.body.position);
+    this.mesh.quaternion.copy(this.body.quaternion);
   }
 }
