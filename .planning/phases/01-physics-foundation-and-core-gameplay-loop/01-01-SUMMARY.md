@@ -142,9 +142,24 @@ None — this plan adds no network endpoints, auth paths, file access, or trust-
 - Known 01-02 inputs: `car.body.position` (for camera follow), `car.mesh` (localToWorld offset)
 - Static camera position (0,5,12) was tested to give reasonable view of car — 01-02 will replace with chase cam
 
+## Post-Verification Fix
+
+**Ground friction bug (discovered during T3 human verify):**
+- `world.defaultContactMaterial.friction = 0.3` (Cannon-es default) was generating ~2700N of friction on the ground contact, essentially cancelling the 2500N drive force. Car velocity plateaued at -0.0016 m/s (invisible movement).
+- Fix: set `world.defaultContactMaterial.friction = 0` and `restitution = 0.0` in PhysicsWorld constructor.
+- Committed in: `25cd9e9` — fix(01-01): set defaultContactMaterial friction=0
+- **Note for 01-02:** If specific surface friction is needed (e.g. ice patches), define explicit ContactMaterials per pair — do not rely on the default.
+
 ## Self-Check: PASSED
 
-All created files verified present on disk. All task commits verified in git log:
+All created files verified present on disk. All 4 human checks passed on desktop browser:
+- ✅ Check 1: Car init log `{ mass: 150, type: 1, allowSleep: false }`, no console errors
+- ✅ Check 2: body.position.y stabilizes at 0.400, never negative
+- ✅ Check 3 (HARD GATE): Car visibly moves on ArrowUp; rotates on ArrowLeft/Right
+- ✅ Check 4: Tab switch survives without delta explosion or NaN
+
+Task commits:
 - `f974525` — feat(01-01): scaffold Vite project
 - `1b4c02f` — feat(01-01): PhysicsWorld + Car + Game loop
 - `0a96947` — docs(01-01): SUMMARY + checkpoint T3
+- `25cd9e9` — fix(01-01): set defaultContactMaterial friction=0
