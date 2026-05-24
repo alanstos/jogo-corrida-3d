@@ -182,7 +182,8 @@ export default class Game {
     this.car.applyInput(intent);
 
     // Step 7: track update BEFORE world.step — obstacle bodies must be positioned before step
-    this.track.update(safeDt, 1.0);
+    // Pass car Z so recycling stays relative to car position (car moves in -Z over time)
+    this.track.update(safeDt, 1.0, this.car.body.position.z);
 
     // Step 8: step physics
     this.physicsWorld.step(safeDt);

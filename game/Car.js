@@ -103,8 +103,17 @@ export default class Car {
     // PITFALLS #1: defensive wakeUp() guard — body may have been manually put to sleep
     this.body.wakeUp();
 
-    // Endless-runner design: forward motion comes from track scrolling, not car Z-force.
-    // Car only steers left/right — Z force is removed to prevent car from outrunning track.
+    // PHYS-01: auto-advance — car always moves forward, boost applied when forward key held
+    // -Z is forward in local space (Three.js / Cannon-es convention)
+    // PITFALLS #2: applyLocalForce keeps direction correct after any rotation.
+    const baseForce = 2500;
+    const boost = intent.forward ? 800 : 0;
+    this.body.applyLocalForce(
+      new CANNON.Vec3(0, 0, -(baseForce + boost)),
+      new CANNON.Vec3(0, 0, 0) // center of mass
+    );
+
+    // Steering via torque on Y axis
     if (intent.left)  this.body.torque.y += 400;
     if (intent.right) this.body.torque.y -= 400;
   }

@@ -110,10 +110,11 @@ export default class Track {
   // ---------------------------------------------------------------
 
   /**
-   * @param {number} deltaTime  - seconds since last frame
+   * @param {number} deltaTime      - seconds since last frame
    * @param {number} speedMultiplier - 1.0 default; hook for difficulty selector (Phase 2)
+   * @param {number} carZ           - car's current world Z position for position-relative recycling
    */
-  update(deltaTime, speedMultiplier = 1.0) {
+  update(deltaTime, speedMultiplier = 1.0, carZ = 0) {
     // Progressive speed ramp (TRACK-04): starts at 20, ramps at 0.5/s, capped at +40 = 60 max
     this._elapsedTime += deltaTime;
     this._scrollSpeed = (20 + Math.min(this._elapsedTime * 0.5, 40)) * speedMultiplier;
@@ -124,8 +125,8 @@ export default class Track {
     // --- Scroll road segments --- (TRACK-01 — pooled recycling, no allocation)
     for (let i = 0; i < this._segments.length; i++) {
       this._segments[i].position.z += scrollDelta;
-      // Recycle: segment passed behind the car — move it to the far end
-      if (this._segments[i].position.z > SEGMENT_LENGTH) {
+      // Recycle relative to car — segment has passed behind the car
+      if (this._segments[i].position.z > carZ + SEGMENT_LENGTH) {
         this._segments[i].position.z -= SEGMENT_COUNT * SEGMENT_LENGTH;
       }
     }
@@ -138,8 +139,8 @@ export default class Track {
       obs.body.position.z += scrollDelta;
       obs.mesh.position.copy(obs.body.position);
 
-      // Deactivate when obstacle scrolls past the camera
-      if (obs.body.position.z > SEGMENT_LENGTH) {
+      // Deactivate relative to car — obstacle has passed behind the car
+      if (obs.body.position.z > carZ + SEGMENT_LENGTH) {
         this._deactivateObstacle(obs);
       }
     }
@@ -149,11 +150,11 @@ export default class Track {
     this._spawnTimer += deltaTime;
     if (this._spawnTimer >= spawnInterval) {
       this._spawnTimer = 0;
-      this._trySpawnObstacle();
+      this._trySpawnObstacle(carZ);
     }
   }
 
-  _trySpawnObstacle() {
+  _trySpawnObstacle(carZ = 0) {
     // Find an inactive obstacle from the pool
     const obs = this._obstacles.find((o) => !o.active);
     if (!obs) return; // pool exhausted — skip this spawn
@@ -162,8 +163,8 @@ export default class Track {
     const lanes = [-3, 0, 3];
     const laneX = lanes[Math.floor(Math.random() * lanes.length)];
 
-    // Spawn at far end of track, just within visible range
-    const spawnZ = -(SEGMENT_COUNT * SEGMENT_LENGTH) + 10;
+    // Spawn at far end of track ahead of the car
+    const spawnZ = carZ - (SEGMENT_COUNT * SEGMENT_LENGTH) + 10;
 
     obs.body.position.set(laneX, 0.75, spawnZ);
     obs.body.velocity.set(0, 0, 0);
