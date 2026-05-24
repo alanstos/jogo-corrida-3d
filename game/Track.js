@@ -1,115 +1,210 @@
-import * as THREE from 'three'
-import * as CANNON from 'cannon-es'
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 
-const TRACK_WIDTH = 12
-const TRACK_LENGTH = 80
+// Pool constants — never change these after init (pool discipline)
+const SEGMENT_COUNT = 12;
+const SEGMENT_LENGTH = 20;
+const TRACK_WIDTH = 10;
+const OBSTACLE_COUNT = 8;
 
 export default class Track {
-  constructor() {
-    this.meshes = []
-    this.bodies = []
-    this._build()
+  /**
+   * @param {THREE.Scene} scene
+   * @param {import('./PhysicsWorld.js').default} physicsWorld
+   */
+  constructor(scene, physicsWorld) {
+    this._scene = scene;
+    this._physicsWorld = physicsWorld;
+
+    this._elapsedTime = 0;
+    this._scrollSpeed = 20; // units/sec — ramps in update()
+    this._spawnTimer = 0;
+
+    this._segments = [];
+    this._obstacles = [];
+
+    this._buildRoadSegments();
+    this._buildLateralEdges();
+    this._buildObstaclePool();
+    this._buildLateralWalls();
   }
 
-  _build() {
-    // ---- Chão visual ----
-    const groundGeo = new THREE.PlaneGeometry(200, 200)
-    const groundMat = new THREE.MeshToonMaterial({ color: 0x0d0020 })
-    const ground = new THREE.Mesh(groundGeo, groundMat)
-    ground.rotation.x = -Math.PI / 2
-    this.meshes.push(ground)
+  // ---------------------------------------------------------------
+  // Construction (one-time — pool built here, NEVER in update)
+  // ---------------------------------------------------------------
 
-    // ---- Superfície da pista ----
-    const trackGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH)
-    const trackMat = new THREE.MeshToonMaterial({ color: 0x220044 })
-    const track = new THREE.Mesh(trackGeo, trackMat)
-    track.rotation.x = -Math.PI / 2
-    track.position.y = 0.01
-    this.meshes.push(track)
+  _buildRoadSegments() {
+    const geo = new THREE.BoxGeometry(TRACK_WIDTH, 0.1, SEGMENT_LENGTH);
+    const mat = new THREE.MeshLambertMaterial({ color: 0x2a0055 });
 
-    // ---- Linhas laterais ciano ----
-    const lineGeo = new THREE.BoxGeometry(0.2, 0.05, TRACK_LENGTH)
-    const lineMat = new THREE.MeshToonMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 0.6 })
-    const lineLeft = new THREE.Mesh(lineGeo, lineMat)
-    lineLeft.position.set(-TRACK_WIDTH / 2, 0.03, 0)
-    this.meshes.push(lineLeft)
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const mesh = new THREE.Mesh(geo, mat);
+      // Position segments in a contiguous line down the -Z axis
+      mesh.position.set(0, 0, -i * SEGMENT_LENGTH);
+      this._scene.add(mesh);
+      this._segments.push(mesh);
+    }
+  }
 
-    const lineRight = lineLeft.clone()
-    lineRight.position.set(TRACK_WIDTH / 2, 0.03, 0)
-    this.meshes.push(lineRight)
+  _buildLateralEdges() {
+    // Neon cyan edge lines — purely visual, static (TRACK-03)
+    const totalLength = SEGMENT_COUNT * SEGMENT_LENGTH;
+    const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, totalLength);
+    const edgeMat = new THREE.MeshLambertMaterial({
+      color: 0x00ffff,
+      emissive: new THREE.Color(0x00ffff),
+      emissiveIntensity: 0.4,
+    });
 
-    // ---- Linhas tracejadas centrais ----
-    for (let z = -TRACK_LENGTH / 2; z < TRACK_LENGTH / 2; z += 5) {
-      const dashGeo = new THREE.BoxGeometry(0.15, 0.04, 2.5)
-      const dashMat = new THREE.MeshToonMaterial({ color: 0xffee00, emissive: 0xffee00, emissiveIntensity: 0.3 })
-      const dash = new THREE.Mesh(dashGeo, dashMat)
-      dash.position.set(0, 0.03, z)
-      this.meshes.push(dash)
+    const leftEdge = new THREE.Mesh(edgeGeo, edgeMat);
+    leftEdge.position.set(-5, 0.25, -totalLength / 2);
+    this._scene.add(leftEdge);
+
+    const rightEdge = new THREE.Mesh(edgeGeo, edgeMat);
+    rightEdge.position.set(5, 0.25, -totalLength / 2);
+    this._scene.add(rightEdge);
+  }
+
+  _buildObstaclePool() {
+    const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+    const mat = new THREE.MeshLambertMaterial({ color: 0xffee00 });
+
+    for (let i = 0; i < OBSTACLE_COUNT; i++) {
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.visible = false;
+      this._scene.add(mesh);
+
+      const body = new CANNON.Body({
+        mass: 0, // static — manually repositioned each tick
+        shape: new CANNON.Box(new CANNON.Vec3(0.75, 0.75, 0.75)),
+      });
+      // Tag for collision identification in Game.js
+      body.userData = { tag: 'obstacle' };
+      // Start off-screen below ground
+      body.position.set(0, -100, 0);
+      this._physicsWorld.addBody(body);
+
+      this._obstacles.push({ mesh, body, active: false });
+    }
+  }
+
+  _buildLateralWalls() {
+    // Invisible CANNON walls — keep car on road (PHYS constraint)
+    // Wall half-extents: 0.5 wide, 2 tall, 1000 deep (covers entire track length)
+    const wallShape = new CANNON.Box(new CANNON.Vec3(0.5, 2, 1000));
+
+    const leftWall = new CANNON.Body({ mass: 0 });
+    leftWall.addShape(wallShape);
+    leftWall.position.set(-5.5, 1, 0);
+    this._physicsWorld.addBody(leftWall);
+
+    const rightWall = new CANNON.Body({ mass: 0 });
+    rightWall.addShape(wallShape);
+    rightWall.position.set(5.5, 1, 0);
+    this._physicsWorld.addBody(rightWall);
+  }
+
+  // ---------------------------------------------------------------
+  // Per-frame update — MUST be called BEFORE physicsWorld.step()
+  // ---------------------------------------------------------------
+
+  /**
+   * @param {number} deltaTime  - seconds since last frame
+   * @param {number} speedMultiplier - 1.0 default; hook for difficulty selector (Phase 2)
+   */
+  update(deltaTime, speedMultiplier = 1.0) {
+    // Progressive speed ramp (TRACK-04): starts at 20, ramps at 1.2/s, capped at +60 = 80 max
+    this._elapsedTime += deltaTime;
+    this._scrollSpeed = (20 + Math.min(this._elapsedTime * 1.2, 60)) * speedMultiplier;
+
+    const scrollDelta = this._scrollSpeed * deltaTime;
+
+    // --- Scroll road segments --- (TRACK-01 — pooled recycling, no allocation)
+    for (let i = 0; i < this._segments.length; i++) {
+      this._segments[i].position.z += scrollDelta;
+      // Recycle: segment passed behind the car — move it to the far end
+      if (this._segments[i].position.z > SEGMENT_LENGTH) {
+        this._segments[i].position.z -= SEGMENT_COUNT * SEGMENT_LENGTH;
+      }
     }
 
-    // ---- Muros laterais (visual) ----
-    const wallGeo = new THREE.BoxGeometry(0.5, 2.0, TRACK_LENGTH)
-    const wallMat = new THREE.MeshToonMaterial({ color: 0x440088 })
+    // --- Scroll active obstacles ---
+    for (let i = 0; i < this._obstacles.length; i++) {
+      const obs = this._obstacles[i];
+      if (!obs.active) continue;
 
-    const wallLeft = new THREE.Mesh(wallGeo, wallMat)
-    wallLeft.position.set(-TRACK_WIDTH / 2 - 0.25, 1.0, 0)
-    this.meshes.push(wallLeft)
+      obs.body.position.z += scrollDelta;
+      obs.mesh.position.copy(obs.body.position);
 
-    const wallRight = wallLeft.clone()
-    wallRight.position.set(TRACK_WIDTH / 2 + 0.25, 1.0, 0)
-    this.meshes.push(wallRight)
+      // Deactivate when obstacle scrolls past the camera
+      if (obs.body.position.z > SEGMENT_LENGTH) {
+        this._deactivateObstacle(obs);
+      }
+    }
 
-    // ---- Linha de chegada ----
-    const finishGeo = new THREE.PlaneGeometry(TRACK_WIDTH, 1.5)
-    const finishMat = new THREE.MeshToonMaterial({ color: 0xffffff })
-    const finish = new THREE.Mesh(finishGeo, finishMat)
-    finish.rotation.x = -Math.PI / 2
-    finish.position.set(0, 0.02, -TRACK_LENGTH / 2 + 4)
-    this.meshes.push(finish)
-
-    // ---- Corpos físicos ----
-    // Chão
-    const groundBody = new CANNON.Body({ mass: 0 })
-    groundBody.addShape(new CANNON.Plane())
-    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
-    this.bodies.push(groundBody)
-
-    // Muro esquerdo
-    const wallHalfExtents = new CANNON.Vec3(0.25, 1.0, TRACK_LENGTH / 2)
-    const wallBodyLeft = new CANNON.Body({ mass: 0 })
-    wallBodyLeft.addShape(new CANNON.Box(wallHalfExtents))
-    wallBodyLeft.position.set(-TRACK_WIDTH / 2 - 0.25, 1.0, 0)
-    this.bodies.push(wallBodyLeft)
-
-    // Muro direito
-    const wallBodyRight = new CANNON.Body({ mass: 0 })
-    wallBodyRight.addShape(new CANNON.Box(wallHalfExtents))
-    wallBodyRight.position.set(TRACK_WIDTH / 2 + 0.25, 1.0, 0)
-    this.bodies.push(wallBodyRight)
-
-    // Muros de fundo (fecham as extremidades)
-    const endHalfExtents = new CANNON.Vec3(TRACK_WIDTH / 2 + 1, 2, 0.25)
-
-    const wallBack = new CANNON.Body({ mass: 0 })
-    wallBack.addShape(new CANNON.Box(endHalfExtents))
-    wallBack.position.set(0, 1.0, -TRACK_LENGTH / 2)
-    this.bodies.push(wallBack)
-
-    const wallFront = new CANNON.Body({ mass: 0 })
-    wallFront.addShape(new CANNON.Box(endHalfExtents))
-    wallFront.position.set(0, 1.0, TRACK_LENGTH / 2)
-    this.bodies.push(wallFront)
+    // --- Spawn logic (TRACK-02 — random obstacles) ---
+    const spawnInterval = 1.5 / speedMultiplier;
+    this._spawnTimer += deltaTime;
+    if (this._spawnTimer >= spawnInterval) {
+      this._spawnTimer = 0;
+      this._trySpawnObstacle();
+    }
   }
 
-  addToWorld(world) {
-    this.bodies.forEach(b => world.addBody(b))
+  _trySpawnObstacle() {
+    // Find an inactive obstacle from the pool
+    const obs = this._obstacles.find((o) => !o.active);
+    if (!obs) return; // pool exhausted — skip this spawn
+
+    // Three lanes: -3, 0, +3 on X axis
+    const lanes = [-3, 0, 3];
+    const laneX = lanes[Math.floor(Math.random() * lanes.length)];
+
+    // Spawn at far end of track, just within visible range
+    const spawnZ = -(SEGMENT_COUNT * SEGMENT_LENGTH) + 10;
+
+    obs.body.position.set(laneX, 0.75, spawnZ);
+    obs.body.velocity.set(0, 0, 0);
+    obs.body.angularVelocity.set(0, 0, 0);
+    obs.mesh.position.set(laneX, 0.75, spawnZ);
+    obs.mesh.visible = true;
+    obs.active = true;
   }
 
-  getMeshes() {
-    return this.meshes
+  _deactivateObstacle(obs) {
+    obs.active = false;
+    obs.body.position.set(0, -100, 0);
+    obs.mesh.visible = false;
   }
 
-  getStartPosition() {
-    return new THREE.Vector3(0, 0.9, TRACK_LENGTH / 2 - 8)
+  // ---------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------
+
+  /**
+   * Full reset — called by Game.reset() on Retry.
+   */
+  reset() {
+    this._elapsedTime = 0;
+    this._scrollSpeed = 20;
+    this._spawnTimer = 0;
+
+    // Reset segment positions to initial layout
+    for (let i = 0; i < this._segments.length; i++) {
+      this._segments[i].position.z = -i * SEGMENT_LENGTH;
+    }
+
+    // Deactivate all obstacles
+    for (let i = 0; i < this._obstacles.length; i++) {
+      this._deactivateObstacle(this._obstacles[i]);
+    }
+  }
+
+  /**
+   * Returns cumulative distance traveled (used for score calculation in Game).
+   * @returns {number}
+   */
+  getDistanceTraveled() {
+    return this._elapsedTime * this._scrollSpeed;
   }
 }
