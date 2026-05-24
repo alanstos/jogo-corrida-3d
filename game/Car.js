@@ -9,6 +9,7 @@ export default class Car {
   constructor(scene, physicsWorld) {
     this._scene = scene;
     this._physicsWorld = physicsWorld;
+    this._onCollide = null; // set via onCollide()
 
     this.body = this._buildBody();
     this.mesh = this._buildMesh();
@@ -19,6 +20,11 @@ export default class Car {
     // Add mesh to scene
     scene.add(this.mesh);
 
+    // Wire collision listener — delegates to external handler (Game) so Car doesn't import Game
+    this.body.addEventListener('collide', (event) => {
+      if (this._onCollide) this._onCollide(event);
+    });
+
     // Diagnostic — verify mass, type, allowSleep before any input is wired
     // PITFALLS #4: mass=0 -> static, type=2. Expected: mass=150, type=1 (DYNAMIC), allowSleep=false
     console.log('Car init:', {
@@ -26,6 +32,39 @@ export default class Car {
       type: this.body.type,
       allowSleep: this.body.allowSleep,
     });
+  }
+
+  /**
+   * Register a collision callback. Game wires its handler here to avoid circular imports.
+   * @param {function} callback
+   */
+  onCollide(callback) {
+    this._onCollide = callback;
+  }
+
+  /**
+   * Reset car to spawn position with zeroed velocity.
+   * Called by Game.reset() on Retry. Defensive wakeUp() ensures next applyInput works.
+   * PITFALLS #1: wakeUp() required — body near zero-velocity may be sleeping on next frame.
+   */
+  reset() {
+    // Re-position to spawn
+    this.body.position.set(0, 1.0, 0);
+
+    // Zero all motion
+    this.body.velocity.set(0, 0, 0);
+    this.body.angularVelocity.set(0, 0, 0);
+    this.body.force.set(0, 0, 0);
+    this.body.torque.set(0, 0, 0);
+
+    // Reset rotation to identity (upright)
+    this.body.quaternion.set(0, 0, 0, 1);
+
+    // Defensive wake-up — PITFALLS #1
+    this.body.wakeUp();
+
+    // Sync mesh immediately so it appears at spawn before next tick
+    this.syncMesh();
   }
 
   _buildBody() {

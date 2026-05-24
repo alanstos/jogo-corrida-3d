@@ -1,4 +1,13 @@
 import Game from './game/Game.js';
 
-const game = new Game(document.getElementById('gameCanvas'));
-game.start();
+// Ensure overlay DOM elements exist before Game constructor queries them (getElementById)
+function init() {
+  const game = new Game(document.getElementById('gameCanvas'));
+  game.start();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
