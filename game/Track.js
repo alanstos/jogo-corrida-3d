@@ -48,7 +48,7 @@ export default class Track {
   }
 
   _buildLateralEdges() {
-    // Neon cyan edge lines — follow car Z each frame so they never disappear (TRACK-03)
+    // Neon cyan edge lines — purely visual, static (TRACK-03)
     const totalLength = SEGMENT_COUNT * SEGMENT_LENGTH;
     const edgeGeo = new THREE.BoxGeometry(0.3, 0.5, totalLength);
     const edgeMat = new THREE.MeshLambertMaterial({
@@ -57,15 +57,13 @@ export default class Track {
       emissiveIntensity: 0.4,
     });
 
-    this._leftEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    this._leftEdge.position.set(-5, 0.25, -totalLength / 2);
-    this._scene.add(this._leftEdge);
+    const leftEdge = new THREE.Mesh(edgeGeo, edgeMat);
+    leftEdge.position.set(-5, 0.25, -totalLength / 2);
+    this._scene.add(leftEdge);
 
-    this._rightEdge = new THREE.Mesh(edgeGeo, edgeMat);
-    this._rightEdge.position.set(5, 0.25, -totalLength / 2);
-    this._scene.add(this._rightEdge);
-
-    this._edgeTotalLength = totalLength;
+    const rightEdge = new THREE.Mesh(edgeGeo, edgeMat);
+    rightEdge.position.set(5, 0.25, -totalLength / 2);
+    this._scene.add(rightEdge);
   }
 
   _buildObstaclePool() {
@@ -146,11 +144,6 @@ export default class Track {
         this._deactivateObstacle(obs);
       }
     }
-
-    // --- Keep lateral edges centered on car ---
-    const edgeZ = carZ - this._edgeTotalLength / 2;
-    this._leftEdge.position.z = edgeZ;
-    this._rightEdge.position.z = edgeZ;
 
     // --- Spawn logic (TRACK-02 — random obstacles) ---
     const spawnInterval = 1.5 / speedMultiplier;
