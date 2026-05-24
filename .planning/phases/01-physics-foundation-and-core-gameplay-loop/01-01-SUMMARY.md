@@ -142,6 +142,9 @@ None — this plan adds no network endpoints, auth paths, file access, or trust-
 - Known 01-02 inputs: `car.body.position` (for camera follow), `car.mesh` (localToWorld offset)
 - Static camera position (0,5,12) was tested to give reasonable view of car — 01-02 will replace with chase cam
 
-## Self-Check: PENDING
+## Self-Check: PASSED
 
-(Will be completed after SUMMARY commit — verified against git log in post-commit section)
+All created files verified present on disk. All task commits verified in git log:
+- `f974525` — feat(01-01): scaffold Vite project
+- `1b4c02f` — feat(01-01): PhysicsWorld + Car + Game loop
+- `0a96947` — docs(01-01): SUMMARY + checkpoint T3
