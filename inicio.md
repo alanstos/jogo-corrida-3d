@@ -140,3 +140,6 @@ Salvar após cada partida:
 3. Implementar os controles de botão mobile
 4. Montar a tela inicial com seletor de dificuldade
 5. Depois, construir as 3 fases progressivamente
+
+## lembrar de executar.
+claude --dangerously-skip-permissions
