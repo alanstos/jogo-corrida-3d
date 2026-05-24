@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 **Wave 1**
 
-- [ ] 01-01: PhysicsWorld + ground plane + Car body + Game RAF loop (hard gate: body.position.y stabilizes above 0, car mesh moves on input)
+- [x] 01-01: PhysicsWorld + ground plane + Car body + Game RAF loop (hard gate: body.position.y stabilizes above 0, car mesh moves on input)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -75,5 +75,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Physics Foundation and Core Gameplay Loop | 0/3 | Not started | - |
+| 1. Physics Foundation and Core Gameplay Loop | 1/3 | In Progress|  |
 | 2. UI Screens, Storage, and Mobile Hardening | 0/2 | Not started | - |
