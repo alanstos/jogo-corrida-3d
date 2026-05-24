@@ -201,6 +201,12 @@ export default class Track {
   }
 
   /**
+   * Returns current scroll speed as integer (used by HUD).
+   * @returns {number}
+   */
+  getSpeed() { return Math.floor(this._scrollSpeed); }
+
+  /**
    * Returns cumulative distance traveled (used for score calculation in Game).
    * @returns {number}
    */

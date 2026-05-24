@@ -4,6 +4,7 @@ import Car from './Car.js';
 import Controls from './Controls.js';
 import Track from './Track.js';
 import Camera from './Camera.js';
+import HUD from './HUD.js';
 
 export default class Game {
   /**
@@ -57,6 +58,9 @@ export default class Game {
     this.car = new Car(this.scene, this.physicsWorld);
     this.controls = new Controls();
     this.track = new Track(this.scene, this.physicsWorld);
+
+    // --- HUD ---
+    this.hud = new HUD();
 
     // --- Wire collision handler ---
     this.car.onCollide((event) => this._handleCarCollision(event));
@@ -191,6 +195,9 @@ export default class Game {
 
     // Step 10: camera follow AFTER syncMesh — needs current mesh world position
     this.camera.follow(this.car.mesh, safeDt);
+
+    // HUD update — after camera, before render
+    this.hud.update({ score: this.score, speed: this.track.getSpeed() });
 
     // Step 11: render LAST
     this.renderer.render(this.scene, this.camera.instance);
