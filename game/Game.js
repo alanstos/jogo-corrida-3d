@@ -3,6 +3,7 @@ import PhysicsWorld from './PhysicsWorld.js';
 import Car from './Car.js';
 import Controls from './Controls.js';
 import Track from './Track.js';
+import Camera from './Camera.js';
 
 export default class Game {
   /**
@@ -40,16 +41,8 @@ export default class Game {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x1a0033);
 
-    // --- Camera --- (static top-behind view — replaced by chase cam in T2 of this plan)
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    // Position: behind and above — static placeholder until Camera.js is wired
-    this.camera.position.set(0, 5, 12);
-    this.camera.lookAt(0, 0, 0);
+    // --- Camera --- chase cam with exponential smoothing (Camera.js — T2 of this plan)
+    this.camera = new Camera(window.innerWidth / window.innerHeight);
 
     // --- Lights --- max 1 DirectionalLight + 1 AmbientLight (CLAUDE.md constraint)
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -93,8 +86,7 @@ export default class Game {
     // --- Event: resize ---
     window.addEventListener('resize', () => {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+      this.camera.onResize(window.innerWidth / window.innerHeight);
     });
   }
 
@@ -149,16 +141,17 @@ export default class Game {
   /**
    * Main game loop — MANDATORY ORDER (ARCHITECTURE.md §4, PITFALLS #3, #6)
    *
-   * Step 1: Schedule next frame
-   * Step 2: Compute safe delta (cap 0.05s — PITFALLS #5)
-   * Step 3: Pause guard
-   * Step 4: State guard — GAME_OVER renders frozen frame then returns
-   * Step 5: Read input
-   * Step 6: Apply forces BEFORE step (PITFALLS #3)
-   * Step 7: Track update BEFORE step (obstacle bodies must settle before step)
-   * Step 8: Step physics
-   * Step 9: Sync mesh AFTER step (PITFALLS #6)
-   * Step 10: Render LAST
+   * Step 1:  Schedule next frame
+   * Step 2:  Compute safe delta (cap 0.05s — PITFALLS #5)
+   * Step 3:  Pause guard
+   * Step 4:  State guard — GAME_OVER renders frozen frame then returns
+   * Step 5:  Read input
+   * Step 6:  Apply forces BEFORE step (PITFALLS #3)
+   * Step 7:  Track update BEFORE step (obstacle bodies must be positioned before step)
+   * Step 8:  Step physics
+   * Step 9:  Sync mesh AFTER step (PITFALLS #6)
+   * Step 10: Camera follow AFTER syncMesh (needs current mesh position)
+   * Step 11: Render LAST
    */
   _tick(timestamp) {
     // Step 1: schedule next frame at top so any early return doesn't kill the loop
@@ -174,7 +167,7 @@ export default class Game {
 
     // Step 4: state guard — GAME_OVER renders last frozen frame then skips all physics/logic
     if (this.state === 'GAME_OVER') {
-      this.renderer.render(this.scene, this.camera);
+      this.renderer.render(this.scene, this.camera.instance);
       return;
     }
 
@@ -196,8 +189,11 @@ export default class Game {
     // Accumulate score from distance (GAME-02 — score scales with distance)
     this.score = this.track.getDistanceTraveled() * 0.5;
 
-    // Step 10: render LAST
-    this.renderer.render(this.scene, this.camera);
+    // Step 10: camera follow AFTER syncMesh — needs current mesh world position
+    this.camera.follow(this.car.mesh, safeDt);
+
+    // Step 11: render LAST
+    this.renderer.render(this.scene, this.camera.instance);
 
     // Diagnostic: log position every 60 frames so developer can see y stabilize above 0
     this._frameCount++;
