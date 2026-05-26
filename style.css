@@ -134,24 +134,44 @@ html, body {
   text-shadow: 0 0 8px #00ffff;
 }
 
-#retryButton {
+.go-record-badge {
+  margin: 0;
+  color: #ffee00;
+  font-size: 18px;
+  text-shadow: 0 0 10px #ffee00;
+}
+
+.go-highscore {
+  margin: 0;
+  color: #ff2255;
+  font-size: 16px;
+  text-shadow: 0 0 8px #ff2255;
+}
+
+.go-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#retryButton, #menuButton {
   background: #ffee00;
   color: #1a0033;
   border: none;
   padding: 20px 40px;
-  font-family: monospace;
-  font-size: 24px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
   font-weight: bold;
   letter-spacing: 2px;
   cursor: pointer;
   touch-action: none;
-  /* Mobile tap target requirements — FEATURES.md */
-  min-width: 200px;
+  min-width: 160px;
   min-height: 80px;
   box-shadow: 0 0 16px #ffee00;
 }
 
-#retryButton:active {
+#retryButton:active, #menuButton:active {
   transform: scale(0.95);
 }
 

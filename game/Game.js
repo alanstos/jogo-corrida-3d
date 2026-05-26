@@ -5,6 +5,7 @@ import Controls from './Controls.js';
 import Track from './Track.js';
 import Camera from './Camera.js';
 import HUD from './HUD.js';
+import { safeGet, safeSet } from './Storage.js';
 
 export default class Game {
   constructor(canvas) {
@@ -62,17 +63,28 @@ export default class Game {
     // --- Wire collision handler ---
     this.car.onCollide((event) => this._handleCarCollision(event));
 
+    // --- Highscore ---
+    this._highScore = safeGet('melhorPontuacao', 0);
+
     // --- DOM refs ---
     this._gameOverEl = document.getElementById('gameOver');
     this._goScoreEl = document.getElementById('goScoreValue');
+    this._goRecordBadgeEl = document.getElementById('goRecordBadge');
+    this._goHighScoreEl = document.getElementById('goHighScoreValue');
     this._retryBtn = document.getElementById('retryButton');
+    this._menuBtn = document.getElementById('menuButton');
     this._menuEl = document.getElementById('menu');
     this._hudEl = document.getElementById('hud');
     this._touchEl = document.getElementById('touchControls');
+    this._menuRecordEl = document.getElementById('menuRecord');
+    this._menuRecordValueEl = document.getElementById('menuRecordValue');
 
-    // Retry/Menu button → return to menu (D-04)
+    // Both game-over buttons → return to menu (D-04)
     if (this._retryBtn) {
       this._retryBtn.addEventListener('pointerup', () => this.returnToMenu());
+    }
+    if (this._menuBtn) {
+      this._menuBtn.addEventListener('pointerup', () => this.returnToMenu());
     }
 
     // --- Event: visibilitychange --- PITFALLS #5 + #13
@@ -102,7 +114,20 @@ export default class Game {
       event.body.userData.tag === 'obstacle'
     ) {
       this.state = 'GAME_OVER';
-      this._goScoreEl.textContent = String(Math.floor(this.score));
+
+      const finalScore = Math.floor(this.score);
+      const isNewRecord = finalScore > this._highScore;
+
+      // Write to localStorage BEFORE showing overlay (research pitfall #9)
+      if (isNewRecord) {
+        this._highScore = finalScore;
+        safeSet('melhorPontuacao', finalScore);
+      }
+
+      this._goScoreEl.textContent = String(finalScore);
+      this._goHighScoreEl.textContent = String(this._highScore);
+      this._goRecordBadgeEl.classList.toggle('hidden', !isNewRecord);
+
       this._gameOverEl.classList.remove('hidden');
       this._gameOverEl.setAttribute('aria-hidden', 'false');
     }
@@ -110,7 +135,7 @@ export default class Game {
 
   /**
    * Return to menu from any game state.
-   * Cancels RAF (no loop while on menu), shows menu overlay, hides HUD/touch.
+   * Cancels RAF, shows menu overlay with updated record, hides HUD/touch.
    * Does NOT reset car/track — reset happens at next start().
    */
   returnToMenu() {
@@ -123,6 +148,12 @@ export default class Game {
     // Hide game-over if visible
     this._gameOverEl.classList.add('hidden');
     this._gameOverEl.setAttribute('aria-hidden', 'true');
+
+    // Update menu record display (D-06: show only when record exists)
+    this._menuRecordValueEl.textContent = String(this._highScore);
+    if (this._highScore > 0) {
+      this._menuRecordEl.classList.remove('hidden');
+    }
 
     // Show menu, hide HUD and touch controls
     this._menuEl.classList.remove('hidden');
