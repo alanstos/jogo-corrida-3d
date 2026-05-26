@@ -251,3 +251,21 @@ html, body {
 .difficulty-btn:active {
   transform: scale(0.93);
 }
+
+/* ---------------------------------------------------------------
+   Context-loss overlay
+   --------------------------------------------------------------- */
+
+#contextLoss {
+  z-index: 200;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.ctx-loss-msg {
+  margin: 0;
+  color: #ffee00;
+  font-size: clamp(14px, 4vw, 22px);
+  text-shadow: 0 0 12px #ffee00;
+  text-align: center;
+}

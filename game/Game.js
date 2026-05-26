@@ -78,6 +78,7 @@ export default class Game {
     this._touchEl = document.getElementById('touchControls');
     this._menuRecordEl = document.getElementById('menuRecord');
     this._menuRecordValueEl = document.getElementById('menuRecordValue');
+    this._contextLossEl = document.getElementById('contextLoss');
 
     // Both game-over buttons → return to menu (D-04)
     if (this._retryBtn) {
@@ -86,6 +87,33 @@ export default class Game {
     if (this._menuBtn) {
       this._menuBtn.addEventListener('pointerup', () => this.returnToMenu());
     }
+
+    // --- WebGL context loss (D-08) ---
+    this.canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault(); // MANDATORY first statement — enables context recovery
+      this._paused = true;
+      this._contextLossEl.classList.remove('hidden');
+      this._contextLossEl.setAttribute('aria-hidden', 'false');
+    }, false);
+
+    this.canvas.addEventListener('webglcontextrestored', () => {
+      try {
+        if (typeof this.renderer.forceContextRestore === 'function') {
+          this.renderer.forceContextRestore();
+        }
+        this.renderer.render(this.scene, this.camera.instance);
+        this._contextLossEl.classList.add('hidden');
+        this._contextLossEl.setAttribute('aria-hidden', 'true');
+        this._paused = false;
+        this._lastTime = performance.now();
+      } catch (e) {
+        console.error('[RetroRacer] WebGL context restore failed:', e);
+      }
+    }, false);
+
+    this._contextLossEl.addEventListener('pointerup', () => {
+      window.location.reload();
+    });
 
     // --- Event: visibilitychange --- PITFALLS #5 + #13
     document.addEventListener('visibilitychange', () => {
