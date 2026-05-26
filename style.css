@@ -194,3 +194,40 @@ html, body {
 #btnIniciar:active {
   transform: scale(0.95);
 }
+
+/* ---------------------------------------------------------------
+   Difficulty selector
+   --------------------------------------------------------------- */
+
+.difficulty-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.difficulty-btn {
+  background: transparent;
+  color: #00ffff;
+  border: 2px solid #00ffff;
+  padding: 12px 20px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  touch-action: none;
+  min-width: 80px;
+  min-height: 60px;
+  letter-spacing: 1px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.difficulty-btn.selected {
+  background: #00ffff;
+  color: #1a0033;
+  border-color: #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+.difficulty-btn:active {
+  transform: scale(0.93);
+}

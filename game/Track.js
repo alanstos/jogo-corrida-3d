@@ -23,6 +23,7 @@ export default class Track {
 
     this._segments = [];
     this._obstacles = [];
+    this._activeLimit = 8; // default = Médio; set via setDifficulty()
 
     this._buildRoadSegments();
     this._buildLateralEdges();
@@ -78,7 +79,7 @@ export default class Track {
     const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
     const mat = new THREE.MeshLambertMaterial({ color: 0xffee00 });
 
-    for (let i = 0; i < OBSTACLE_COUNT; i++) {
+    for (let i = 0; i < 12; i++) { // always build 12 (max for Difícil); _activeLimit caps spawning
       const mesh = new THREE.Mesh(geo, mat);
       mesh.visible = false;
       this._scene.add(mesh);
@@ -174,9 +175,13 @@ export default class Track {
   }
 
   _trySpawnObstacle(carZ = 0) {
-    // Find an inactive obstacle from the pool
+    // Difficulty cap: don't exceed active limit
+    const activeCount = this._obstacles.filter((o) => o.active).length;
+    if (activeCount >= this._activeLimit) return;
+
+    // Pool exhaustion guard
     const obs = this._obstacles.find((o) => !o.active);
-    if (!obs) return; // pool exhausted — skip this spawn
+    if (!obs) return;
 
     // Three lanes: -3, 0, +3 on X axis
     const lanes = [-3, 0, 3];
@@ -224,6 +229,14 @@ export default class Track {
     for (let i = 0; i < this._obstacles.length; i++) {
       this._deactivateObstacle(this._obstacles[i]);
     }
+  }
+
+  /**
+   * Set active obstacle limit for current difficulty.
+   * @param {number} obstacleCount
+   */
+  setDifficulty(obstacleCount) {
+    this._activeLimit = obstacleCount;
   }
 
   /**

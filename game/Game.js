@@ -138,6 +138,9 @@ export default class Game {
   start({ speedMultiplier = 1.0, obstacleCount = 8 } = {}) {
     this._speedMultiplier = speedMultiplier;
 
+    // Apply difficulty before reset so pool cap is set before obstacles are cleared
+    this.track.setDifficulty(obstacleCount);
+
     // Reset car, track, score for a fresh run
     this.car.reset();
     this.track.reset();
