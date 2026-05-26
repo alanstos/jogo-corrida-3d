@@ -41,11 +41,11 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02: Track segment pool + obstacles + lateral limits + progressive speed + chase camera + collision/game-over
+- [x] 01-02: Track segment pool + obstacles + lateral limits + progressive speed + chase camera + collision/game-over
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03: HUD DOM overlay + touch controls + keyboard fallback + PERF renderer config + visibilitychange pause
+- [x] 01-03: HUD DOM overlay + touch controls + keyboard fallback + PERF renderer config + visibilitychange pause
 
 ### Phase 2: UI Screens, Storage, and Mobile Hardening
 
@@ -65,8 +65,16 @@ Plans:
 
 Plans:
 
-- [ ] 02-01: Menu screen + difficulty selector + difficulty integration into Track/Game state
-- [ ] 02-02: Storage module (safeGet/safeSet) + highscore display on menu + WebGL context loss handler + visibilitychange hardening audit
+**Wave 1**
+
+- [x] 02-01: Storage module (safeGet/safeSet with localStorage error-wrapping)
+- [x] 02-02: Menu overlay + INICIAR wiring + HUD/Touch hidden on load + returnToMenu()
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 02-03: Difficulty selector (FÁCIL/MÉDIO/DIFÍCIL) + Track obstacle-pool parameterization
+- [x] 02-04: Game-over revamp — NOVO RECORDE badge, highscore persistence, RETRY + MENU buttons
+- [x] 02-05: WebGL context loss handler — TOQUE PARA RECARREGAR overlay + context restore
 
 ## Progress
 
@@ -75,5 +83,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Physics Foundation and Core Gameplay Loop | 1/3 | In Progress|  |
-| 2. UI Screens, Storage, and Mobile Hardening | 0/2 | Not started | - |
+| 1. Physics Foundation and Core Gameplay Loop | 3/3 | Complete | 2026-05-25 |
+| 2. UI Screens, Storage, and Mobile Hardening | 5/5 | Complete | 2026-05-26 |
