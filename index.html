@@ -13,14 +13,25 @@
 <body>
   <canvas id="gameCanvas"></canvas>
 
-  <div id="hud" class="hud" aria-hidden="true">
+  <!-- HUD: hidden during menu, shown on game.start() -->
+  <div id="hud" class="hud hidden" aria-hidden="true">
     <div class="hud-cell hud-score">SCORE <span id="hudScore">0</span></div>
     <div class="hud-cell hud-speed">SPEED <span id="hudSpeed">0</span></div>
   </div>
 
-  <div id="touchControls" class="touch-controls" aria-hidden="false">
+  <!-- Touch controls: hidden during menu, shown on game.start() -->
+  <div id="touchControls" class="touch-controls hidden" aria-hidden="false">
     <button id="btnLeft" class="touch-btn touch-btn-left" type="button" aria-label="Steer left">&#9664;</button>
     <button id="btnRight" class="touch-btn touch-btn-right" type="button" aria-label="Steer right">&#9654;</button>
+  </div>
+
+  <!-- Menu overlay — visible on load (no .hidden), hidden when INICIAR pressed -->
+  <div id="menu" class="overlay" aria-hidden="false">
+    <div class="overlay-inner">
+      <h1 class="menu-logo">RETRO RACER 3D</h1>
+      <p id="menuRecord" class="menu-record hidden">RECORDE: <span id="menuRecordValue">0</span></p>
+      <button id="btnIniciar" type="button">INICIAR</button>
+    </div>
   </div>
 
   <!-- Game-Over overlay — hidden by default, shown on state=GAME_OVER -->
@@ -28,7 +39,7 @@
     <div class="overlay-inner">
       <h1 class="go-title">GAME OVER</h1>
       <p class="go-score">SCORE: <span id="goScoreValue">0</span></p>
-      <button id="retryButton" type="button">RETRY</button>
+      <button id="retryButton" type="button">MENU</button>
     </div>
   </div>
 

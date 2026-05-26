@@ -106,6 +106,10 @@ html, body {
   display: none;
 }
 
+.hidden {
+  display: none;
+}
+
 .overlay-inner {
   display: flex;
   flex-direction: column;
@@ -148,5 +152,45 @@ html, body {
 }
 
 #retryButton:active {
+  transform: scale(0.95);
+}
+
+/* ---------------------------------------------------------------
+   Menu overlay
+   --------------------------------------------------------------- */
+
+.menu-logo {
+  margin: 0;
+  color: #ffee00;
+  font-size: clamp(20px, 5vw, 40px);
+  text-shadow: 0 0 14px #ffee00;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.menu-record {
+  margin: 0;
+  color: #00ffff;
+  font-size: 14px;
+  text-shadow: 0 0 8px #00ffff;
+}
+
+#btnIniciar {
+  background: #ffee00;
+  color: #1a0033;
+  border: none;
+  padding: 20px 48px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  touch-action: none;
+  min-width: 200px;
+  min-height: 80px;
+  box-shadow: 0 0 16px #ffee00;
+}
+
+#btnIniciar:active {
   transform: scale(0.95);
 }
