@@ -571,21 +571,24 @@ if (this._frameCount % 60 === 0) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Turbo button layout in touch controls**
    - What we know: #touchControls has left/right buttons side by side at bottom. Turbo needs to be reachable with one thumb while steering.
    - What's unclear: Center-bottom (between left/right), or center-top of the touch zone?
    - Recommendation: Center-bottom between left/right buttons — matches arcade layout ("boost is in the middle"); planner decides final position.
+   - RESOLVED: Center-bottom position adopted — implemented in Plan 03-02 Task 1 (index.html).
 
 2. **Particle color — orange sparks or cyan glow matching car?**
    - What we know: Car is cyan (0x00ffff), obstacles are yellow (0xffee00), road is purple.
    - What's unclear: Which reads better as "collision sparks" against the retro palette.
    - Recommendation: Orange (0xff8800) — contrasts with both cyan car and purple road; reads as "heat/impact" in retro arcade visual language.
+   - RESOLVED: Orange (0xff8800) adopted — implemented in Plan 03-03 Task 1 (ParticleSystem.js).
 
 3. **Should car init diagnostic log (Car.js L29-33) be removed in Plan 03-01?**
    - What we know: It fires once at construction, not in the game loop, so it doesn't contribute to the periodic 1/s spam. But it is console noise in production.
    - Recommendation: Remove it in Plan 03-01 along with the Game.js loop log — clean sweep of all diagnostic logs.
+   - RESOLVED: Removed in Plan 03-01 Task 2 (Car.js).
 
 ---
 

@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: content-and-polish
-status: roadmap_defined
-last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 -- Requirements (10) + Roadmap (Phases 3-7, 21 plans) defined
+milestone_name: Content & Polish
+status: executing
+stopped_at: v2.0 roadmap completo — 10 requirements, 5 phases (3-7), 21 plans
+last_updated: "2026-05-27T14:53:33.088Z"
+last_activity: 2026-05-27 -- Phase 3 planning complete
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 21
+  total_plans: 5
   completed_plans: 0
   percent: 0
 ---
@@ -26,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 
 Phase: Phase 3 — Game Feel (not started)
 Plan: —
-Status: Roadmap defined — ready to execute Phase 3
-Last activity: 2026-05-27 — Requirements + Roadmap defined
+Status: Ready to execute
+Last activity: 2026-05-27 -- Phase 3 planning complete
 
 Progress: [░░░░░░░░░░] 0% (0/21 plans)
 

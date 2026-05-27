@@ -33,12 +33,12 @@
 **Requirements**: FEEL-01, FEEL-02, FEEL-03, FEEL-04
 **Tech debt covered**: Remover `console.log` periódico em `Game.js` ~L276
 
-**Plans** (5 planos estimados):
-1. `03-01-remove-console-log-debt` — remover log periódico de Game.js; verificar ausência de logs em produção
-2. `03-02-implement-turbo-boost` — botão TURBO na HUD (touch + teclado), lógica 2s boost / 5s cooldown, indicador visual de cooldown no botão
-3. `03-03-add-collision-particles` — sistema de partículas pooladas (≤20, MeshBasicMaterial), burst ao colidir, zero alloc runtime
-4. `03-04-add-camera-shake` — offset noise no lerp target da câmera por ~300ms pós-colisão, retorno suave
-5. `03-05-add-haptic-feedback` — `navigator.vibrate()` no turbo (50ms) e colisão (100ms), fallback silencioso
+**Plans** (5 plans):
+- [ ] 03-01-PLAN.md — Remove periodic console.log debt from Game.js and Car.js init log (tech debt cleanup)
+- [ ] 03-02-PLAN.md — TURBO button in HUD (touch + keyboard), 2s boost / 5s cooldown state machine, visual cooldown indicator (FEEL-01)
+- [ ] 03-03-PLAN.md — InstancedMesh particle pool (≤20, MeshBasicMaterial), burst on collision with zero runtime allocation (FEEL-02)
+- [ ] 03-04-PLAN.md — Camera shake offset on collision (~300ms exponential decay), additive to lerp target, no physics coupling (FEEL-03)
+- [ ] 03-05-PLAN.md — navigator.vibrate guarded helper, 50ms on turbo and 100ms on collision, silent fallback on iOS/Firefox 129+ (FEEL-04)
 
 **Success Criteria** (o que deve ser verdade ao final):
 1. Jogador pressiona TURBO no mobile, sente vibração e o indicador de cooldown bloqueia reativação pelos 5s seguintes
