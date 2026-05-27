@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-last_updated: "2026-05-26T00:00:00.000Z"
-last_activity: 2026-05-26 -- Phase 02 all plans complete — pending verification
+milestone: v2.0
+milestone_name: content-and-polish
+status: milestone_complete
+last_updated: "2026-05-27T00:00:00.000Z"
+last_activity: 2026-05-27 -- v1.0 MVP milestone closed and archived
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
   completed_plans: 8
   percent: 100
@@ -17,54 +17,39 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-24)
+See: .planning/PROJECT.md (updated 2026-05-27)
 
 **Core value:** O carro se move, responde aos controles touch e o jogador consegue completar uma fase — jogabilidade funcional antes de qualquer polimento.
-**Current focus:** Phase 02 — ui-screens-storage-and-mobile-hardening
+**Current focus:** v1.0 shipped — planejando v2.0 (Content & Polish)
 
 ## Current Position
 
-Phase: 02 (ui-screens-storage-and-mobile-hardening) — VERIFYING
-Plan: 5 of 5 (all complete)
-Status: Phase 02 all plans complete — running verification
-Last activity: 2026-05-26 -- Phase 02 all plans complete — pending verification
+Phase: — (entre milestones)
+Plan: —
+Status: v1.0 MVP completo e arquivado
 
-Progress: [██████░░░░] 50%
+Progress: [████████████] 100% (v1.0 completo)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
-- Average duration: ~25 min/plan
-- Total execution time: ~75 min
+- Total plans completed: 8
+- Average duration: ~20 min/plan
+- Total execution time: ~4 dias
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Physics Foundation | 3/3 ✅ | ~75min | ~25min |
-| 2. UI + Hardening | 5/5 ✅ | ~125min | ~25min |
-
-**Recent Trend:**
-
-- Last 5 plans: 01-01 (~7min), 01-02 (~25min), 01-03 (~43min)
-- Trend: on track
-
-*Updated after each plan completion*
+| 2. UI + Hardening | 5/5 ✅ | ~100min | ~20min |
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- Init: Rebuild from zero — bugs in prior impl were irrecoverable, not a stack issue
-- Init: Four simultaneous root causes of car-not-moving identified (sleep, zero mass, force coord space, mesh-sync order) — Phase 1 must fix all four as a unit
-- Init: Phase 1 is a hard gate — nothing in Phase 2 has value until the car visibly moves on input on a real Android device
-- 01-03: Track recycling must be position-relative (carZ) — car moves in -Z at ~55 units/s terminal velocity, fixed-threshold recycling breaks at score ~120
-- 01-03: Lateral edges implemented as pooled segments (SEGMENT_COUNT pairs) — static long meshes disappear as car outruns them
+Todas as decisões de v1.0 documentadas em PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
@@ -72,20 +57,22 @@ None.
 
 ### Blockers/Concerns
 
-None. Phase 2 win condition resolved: endless/distance-score model (no lap gates in Phase 2 scope — deferred to v2).
+None. v1.0 completo e UAT aprovado pelo usuário.
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| v2 content | Phase 2 track (Autodromo Arcade) | v2 | Init |
-| v2 content | Phase 3 track (Rodovia Infinita) | v2 | Init |
-| v2 game feel | Turbo, particles, camera shake, haptic | v2 | Init |
-| v2 polish | Sounds, backgrounds, glitch effect | v2 | Init |
+| v2 game feel | Turbo, partículas, camera shake, haptic | v2 | Init |
+| v2 content | Phase 4: Autodromo Arcade | v2 | Init |
+| v2 content | Phase 5: Rodovia Infinita | v2 | Init |
+| v2 gameplay | Carros inimigos AI | v2 | Init |
+| v2 polish | Sons 8-bit | v2 | Init |
+| tech debt | console.log periódico em Game.js L276 | backlog | Phase 1 |
 
 ## Session Continuity
 
-Last session: 2026-05-25T21:30:00.000Z
-Stopped at: Phase 2 planning complete — 5 plans ready for execution
-Resume file: .planning/phases/02-ui-screens-storage-and-mobile-hardening/02-01-PLAN.md
-Next action: /gsd-execute-phase 2
+Last session: 2026-05-27T00:00:00.000Z
+Stopped at: v1.0 milestone closed — próximo passo /gsd-new-milestone para v2.0
+Resume file: —
+Next action: /gsd-new-milestone

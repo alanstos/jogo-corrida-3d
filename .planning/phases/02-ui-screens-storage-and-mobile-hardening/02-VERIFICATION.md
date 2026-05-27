@@ -1,16 +1,16 @@
 ---
 phase: 02-ui-screens-storage-and-mobile-hardening
 verified: 2026-05-26T00:00:00Z
-status: human_needed
+status: passed
 score: 4/4 must-haves verified
 overrides_applied: 0
 human_verification:
   - test: "Selecionar DIFÍCIL e pressionar INICIAR produz obstáculos visivelmente mais densos e velocidade mais alta do que FÁCIL na mesma sessão"
     expected: "DIFÍCIL mostra claramente mais obstáculos simultâneos (até 12) e o jogo rola mais rápido (speedMultiplier 1.4 vs 0.75) do que FÁCIL"
-    why_human: "Percepção de densidade e velocidade é subjetiva e depende de renderização — não pode ser verificada por grep ou análise estática"
+    result: "PASSOU — 2026-05-27"
   - test: "Perda de contexto WebGL (simulada via DevTools WEBGL_lose_context) não trava o jogo nem deixa canvas em branco"
     expected: "Overlay TOQUE PARA RECARREGAR aparece imediatamente; restaurar contexto via ext.restoreContext() esconde o overlay e o jogo retoma"
-    why_human: "Comportamento de context loss/restore exige execução real no browser com a extensão WEBGL_lose_context do Chrome DevTools"
+    result: "PASSOU — 2026-05-27"
 ---
 
 # Phase 2: UI Screens, Storage, and Mobile Hardening — Relatório de Verificação
