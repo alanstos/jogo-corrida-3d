@@ -8,10 +8,10 @@
 
 ### Game Feel (FEEL)
 
-- [ ] **FEEL-01**: Botão TURBO na tela dispara boost de velocidade por 2s com cooldown de 5s — indicador visual do cooldown, não ativável durante cooldown, funciona no touch e teclado
-- [ ] **FEEL-02**: Colisão com obstáculo ou AI emite burst de partículas no ponto de impacto — ≤ 20 partículas por evento, MeshBasicMaterial, auto-recycle (sem alocação em runtime)
-- [ ] **FEEL-03**: Câmera treme por ~300ms após colisão (offset noise aplicado ao lerp target) com retorno suave — sem afetar a lógica de física
-- [ ] **FEEL-04**: `navigator.vibrate()` disparado no uso do turbo (~50ms) e na colisão (~100ms) — graceful degradation silenciosa se API ausente (iOS não suporta)
+- [x] **FEEL-01**: Botão TURBO na tela dispara boost de velocidade por 2s com cooldown de 5s — indicador visual do cooldown, não ativável durante cooldown, funciona no touch e teclado
+- [x] **FEEL-02**: Colisão com obstáculo ou AI emite burst de partículas no ponto de impacto — ≤ 20 partículas por evento, MeshBasicMaterial, auto-recycle (sem alocação em runtime)
+- [x] **FEEL-03**: Câmera treme por ~300ms após colisão (offset noise aplicado ao lerp target) com retorno suave — sem afetar a lógica de física
+- [x] **FEEL-04**: `navigator.vibrate()` disparado no uso do turbo (~50ms) e na colisão (~100ms) — graceful degradation silenciosa se API ausente (iOS não suporta)
 
 ### Progression (PROG)
 
@@ -44,10 +44,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FEEL-01 | Phase 3 | Pending |
-| FEEL-02 | Phase 3 | Pending |
-| FEEL-03 | Phase 3 | Pending |
-| FEEL-04 | Phase 3 | Pending |
+| FEEL-01 | Phase 3 | Complete |
+| FEEL-02 | Phase 3 | Complete |
+| FEEL-03 | Phase 3 | Complete |
+| FEEL-04 | Phase 3 | Complete |
 | PROG-01 | Phase 4 | Pending |
 | PROG-02 | Phase 5 | Pending |
 | PROG-03 | Phase 6 | Pending |
@@ -56,6 +56,7 @@
 | POLISH-02 | Phase 7 | Pending |
 
 **Coverage:**
+
 - v2 requirements: 10 total
 - Mapped to phases: 10
 - Unmapped: 0 ✓

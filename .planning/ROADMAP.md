@@ -141,7 +141,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 1. Physics Foundation and Core Gameplay Loop | v1.0 | 3/3 | Complete | 2026-05-25 |
 | 2. UI Screens, Storage, and Mobile Hardening | v1.0 | 5/5 | Complete | 2026-05-26 |
-| 3. Game Feel | v2.0 | 5/5 | Complete   | 2026-05-27 |
+| 3. Game Feel | v2.0 | 5/5 | Complete    | 2026-05-27 |
 | 4. Fase 2 — Autodromo Arcade | v2.0 | 0/4 | Not started | — |
 | 5. Fase 3 — Rodovia Infinita | v2.0 | 0/3 | Not started | — |
 | 6. AI Cars + Stars | v2.0 | 0/5 | Not started | — |
