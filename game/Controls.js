@@ -1,6 +1,6 @@
 export default class Controls {
   constructor() {
-    this._keyState = { left: false, right: false, forward: false };
+    this._keyState = { left: false, right: false, forward: false, turbo: false };
     this._activePointers = new Map();
     this._bindKeyboard();
     this._bindTouch();
@@ -11,19 +11,23 @@ export default class Controls {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A')  this._keyState.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this._keyState.right = true;
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')    this._keyState.forward = true;
+      if (e.key === 't' || e.key === 'T' || e.key === ' ') this._keyState.turbo = true;
     });
     window.addEventListener('keyup', (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A')  this._keyState.left = false;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this._keyState.right = false;
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')    this._keyState.forward = false;
+      if (e.key === 't' || e.key === 'T' || e.key === ' ') this._keyState.turbo = false;
     });
   }
 
   _bindTouch() {
     const left = document.getElementById('btnLeft');
     const right = document.getElementById('btnRight');
+    const turbo = document.getElementById('btnTurbo');
     if (left)  this._bindButton(left, 'left');
     if (right) this._bindButton(right, 'right');
+    if (turbo) this._bindButton(turbo, 'turbo');
   }
 
   _bindButton(el, dir) {
@@ -48,15 +52,17 @@ export default class Controls {
   getIntent() {
     const touchLeft  = Array.from(this._activePointers.values()).includes('left');
     const touchRight = Array.from(this._activePointers.values()).includes('right');
+    const touchTurbo = Array.from(this._activePointers.values()).includes('turbo');
     return {
       left:    this._keyState.left  || touchLeft,
       right:   this._keyState.right || touchRight,
       forward: this._keyState.forward,
+      turbo:   this._keyState.turbo || touchTurbo,
     };
   }
 
   destroy() {
-    this._keyState = { left: false, right: false, forward: false };
+    this._keyState = { left: false, right: false, forward: false, turbo: false };
     this._activePointers.clear();
   }
 }
