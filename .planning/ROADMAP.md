@@ -36,7 +36,7 @@
 **Plans** (5 plans):
 - [x] 03-01-PLAN.md — Remove periodic console.log debt from Game.js and Car.js init log (tech debt cleanup)
 - [x] 03-02-PLAN.md — TURBO button in HUD (touch + keyboard), 2s boost / 5s cooldown state machine, visual cooldown indicator (FEEL-01)
-- [ ] 03-03-PLAN.md — InstancedMesh particle pool (≤20, MeshBasicMaterial), burst on collision with zero runtime allocation (FEEL-02)
+- [x] 03-03-PLAN.md — InstancedMesh particle pool (≤20, MeshBasicMaterial), burst on collision with zero runtime allocation (FEEL-02)
 - [ ] 03-04-PLAN.md — Camera shake offset on collision (~300ms exponential decay), additive to lerp target, no physics coupling (FEEL-03)
 - [ ] 03-05-PLAN.md — navigator.vibrate guarded helper, 50ms on turbo and 100ms on collision, silent fallback on iOS/Firefox 129+ (FEEL-04)
 
@@ -126,7 +126,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 1. Physics Foundation and Core Gameplay Loop | v1.0 | 3/3 | Complete | 2026-05-25 |
 | 2. UI Screens, Storage, and Mobile Hardening | v1.0 | 5/5 | Complete | 2026-05-26 |
-| 3. Game Feel | v2.0 | 2/5 | In Progress|  |
+| 3. Game Feel | v2.0 | 3/5 | In Progress|  |
 | 4. Fase 2 — Autodromo Arcade | v2.0 | 0/4 | Not started | — |
 | 5. Fase 3 — Rodovia Infinita | v2.0 | 0/3 | Not started | — |
 | 6. AI Cars + Stars | v2.0 | 0/5 | Not started | — |
