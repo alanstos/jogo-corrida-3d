@@ -92,17 +92,18 @@ export default class Car {
    * MUST be called BEFORE physicsWorld.step() in the game loop.
    * @param {{ forward: boolean, left: boolean, right: boolean }} intent
    */
-  applyInput(intent) {
+  applyInput(intent, turboActive = false) {
     // PITFALLS #1: defensive wakeUp() guard — body may have been manually put to sleep
     this.body.wakeUp();
 
     // PHYS-01: auto-advance — car always moves forward, boost applied when forward key held
     // -Z is forward in local space (Three.js / Cannon-es convention)
     // PITFALLS #2: applyLocalForce keeps direction correct after any rotation.
+    const forceMultiplier = turboActive ? 2.5 : 1.0;
     const baseForce = 2500;
     const boost = intent.forward ? 800 : 0;
     this.body.applyLocalForce(
-      new CANNON.Vec3(0, 0, -(baseForce + boost)),
+      new CANNON.Vec3(0, 0, -(baseForce + boost) * forceMultiplier),
       new CANNON.Vec3(0, 0, 0) // center of mass
     );
 
