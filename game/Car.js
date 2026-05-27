@@ -67,7 +67,7 @@ export default class Car {
       mass: 150,
       shape: new CANNON.Box(new CANNON.Vec3(0.9, 0.4, 2.0)),
       linearDamping: 0.3,
-      angularDamping: 0.9,
+      angularDamping: 0.4,
       allowSleep: false,
     });
 
@@ -108,8 +108,8 @@ export default class Car {
     );
 
     // Steering via torque on Y axis
-    if (intent.left)  this.body.torque.y += 400;
-    if (intent.right) this.body.torque.y -= 400;
+    if (intent.left)  this.body.torque.y += 600;
+    if (intent.right) this.body.torque.y -= 600;
   }
 
   /**
