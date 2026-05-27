@@ -288,7 +288,12 @@ export default class Game {
     this.camera.follow(this.car.mesh, safeDt);
 
     // HUD
-    this.hud.update({ score: this.score, speed: this.track.getSpeed() });
+    this.hud.update({
+      score: this.score,
+      speed: this.track.getSpeed(),
+      turboState: this._turboState,
+      turboCooldownRatio: this._turboState === 'cooling' ? this._turboTimer / TURBO_COOLDOWN : 0,
+    });
 
     // Step 11
     this.renderer.render(this.scene, this.camera.instance);
