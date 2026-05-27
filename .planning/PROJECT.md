@@ -8,9 +8,21 @@ Jogo de corrida 3D arcade para web, otimizado para mobile (90% mobile, 10% deskt
 
 O carro se move, responde aos controles touch e o jogador consegue completar uma fase — jogabilidade funcional antes de qualquer polimento.
 
+## Current Milestone: v2.0 Content & Polish
+
+**Goal:** Expandir o jogo com game feel, novas fases, carros inimigos AI e sons — transformando o MVP jogável numa experiência arcade completa.
+
+**Target features:**
+- Game Feel — Turbo com cooldown, partículas de faísca, camera shake, haptic feedback
+- Fase 2 — Autodromo Arcade (nova pista temática)
+- Fase 3 — Rodovia Infinita (pool de segmentos para memória constante)
+- Carros inimigos AI spawner lane-based + sistema de estrelas por fase (1-3)
+- Sons 8-bit via Web Audio API
+
 ## Current State
 
 **Shipped:** v1.0 MVP — 2026-05-27
+**In progress:** v2.0 Content & Polish
 **Codebase:** ~5,500 LOC (JS + CSS + HTML), zero dependências de backend
 **Tech stack:** Three.js 0.184.0 + Cannon-es 0.20.0 + Vite 6.3.5
 
@@ -90,4 +102,4 @@ O carro se move, responde aos controles touch e o jogador consegue completar uma
 This document evolves at phase transitions and milestone boundaries.
 
 ---
-*Last updated: 2026-05-27 after v1.0 milestone*
+*Last updated: 2026-05-27 — v2.0 milestone started*
