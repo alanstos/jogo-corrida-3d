@@ -23,6 +23,7 @@ export default class Game {
     this.state = 'MENU';
     this.score = 0;
     this._speedMultiplier = 1.0;
+    this._lastDifficulty = {};
 
     // Mobile detection
     const isMobile = /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
@@ -91,9 +92,8 @@ export default class Game {
     this._menuRecordValueEl = document.getElementById('menuRecordValue');
     this._contextLossEl = document.getElementById('contextLoss');
 
-    // Both game-over buttons → return to menu (D-04)
     if (this._retryBtn) {
-      this._retryBtn.addEventListener('pointerup', () => this.returnToMenu());
+      this._retryBtn.addEventListener('pointerup', () => this.retry());
     }
     if (this._menuBtn) {
       this._menuBtn.addEventListener('pointerup', () => this.returnToMenu());
@@ -213,11 +213,24 @@ export default class Game {
     this._touchEl.classList.add('hidden');
   }
 
+  retry() {
+    if (this._rafHandle !== null) {
+      cancelAnimationFrame(this._rafHandle);
+      this._rafHandle = null;
+    }
+    this._gameOverEl.classList.add('hidden');
+    this._gameOverEl.setAttribute('aria-hidden', 'true');
+    this._hudEl.classList.remove('hidden');
+    this._touchEl.classList.remove('hidden');
+    this.start(this._lastDifficulty);
+  }
+
   /**
    * Start (or restart) gameplay with a given difficulty.
    * @param {{ speedMultiplier?: number, obstacleCount?: number }} difficulty
    */
   start({ speedMultiplier = 1.0, obstacleCount = 8 } = {}) {
+    this._lastDifficulty = { speedMultiplier, obstacleCount };
     this._speedMultiplier = speedMultiplier;
 
     // Apply difficulty before reset so pool cap is set before obstacles are cleared
