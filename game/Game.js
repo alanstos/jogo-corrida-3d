@@ -13,7 +13,6 @@ export default class Game {
     this._rafHandle = null;
     this._lastTime = 0;
     this._paused = false;
-    this._frameCount = 0;
 
     // State machine: MENU / PLAYING / GAME_OVER
     this.state = 'MENU';
@@ -269,12 +268,6 @@ export default class Game {
 
     // Step 11
     this.renderer.render(this.scene, this.camera.instance);
-
-    this._frameCount++;
-    if (this._frameCount % 60 === 0) {
-      const p = this.car.body.position;
-      console.log(`[frame ${this._frameCount}] body.position:`, { x: p.x.toFixed(3), y: p.y.toFixed(3), z: p.z.toFixed(3) });
-    }
   }
 
   stop() {
