@@ -7,6 +7,9 @@ import Camera from './Camera.js';
 import HUD from './HUD.js';
 import { safeGet, safeSet } from './Storage.js';
 
+const TURBO_DURATION = 2.0;  // seconds of boost
+const TURBO_COOLDOWN = 5.0;  // seconds of cooldown before reactivation
+
 export default class Game {
   constructor(canvas) {
     this.canvas = canvas;
@@ -64,6 +67,10 @@ export default class Game {
 
     // --- Highscore ---
     this._highScore = safeGet('melhorPontuacao', 0);
+
+    // --- Turbo state machine ---
+    this._turboState = 'idle';   // 'idle' | 'boosting' | 'cooling'
+    this._turboTimer = 0;
 
     // --- DOM refs ---
     this._gameOverEl = document.getElementById('gameOver');
@@ -203,6 +210,8 @@ export default class Game {
     this.car.reset();
     this.track.reset();
     this.score = 0;
+    this._turboState = 'idle';
+    this._turboTimer = 0;
 
     this._lastTime = performance.now();
     this.state = 'PLAYING';
@@ -245,8 +254,23 @@ export default class Game {
     // Step 5
     const intent = this.controls.getIntent();
 
+    // Step 5.5 — Turbo state machine (MUST be after getIntent, before applyInput)
+    if (intent.turbo && this._turboState === 'idle' && this.state === 'PLAYING') {
+      this._turboState = 'boosting';
+      this._turboTimer = TURBO_DURATION;
+    }
+    if (this._turboState === 'boosting') {
+      this._turboTimer -= safeDt;
+      if (this._turboTimer <= 0) { this._turboState = 'cooling'; this._turboTimer = TURBO_COOLDOWN; }
+    }
+    if (this._turboState === 'cooling') {
+      this._turboTimer -= safeDt;
+      if (this._turboTimer <= 0) { this._turboState = 'idle'; this._turboTimer = 0; }
+    }
+    const turboActive = this._turboState === 'boosting';
+
     // Step 6
-    this.car.applyInput(intent);
+    this.car.applyInput(intent, turboActive);
 
     // Step 7
     this.track.update(safeDt, this._speedMultiplier, this.car.body.position.z);
@@ -264,7 +288,12 @@ export default class Game {
     this.camera.follow(this.car.mesh, safeDt);
 
     // HUD
-    this.hud.update({ score: this.score, speed: this.track.getSpeed() });
+    this.hud.update({
+      score: this.score,
+      speed: this.track.getSpeed(),
+      turboState: this._turboState,
+      turboCooldownRatio: this._turboState === 'cooling' ? this._turboTimer / TURBO_COOLDOWN : 0,
+    });
 
     // Step 11
     this.renderer.render(this.scene, this.camera.instance);

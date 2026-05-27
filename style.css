@@ -87,6 +87,38 @@ html, body {
   .touch-controls { display: none; }
 }
 
+.touch-btn-turbo {
+  width: 20vw;
+  max-width: 120px;
+  min-width: 80px;
+  min-height: 70px;
+  max-height: 100px;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-btn-turbo.boosting {
+  background: rgba(255, 150, 0, 0.5);
+  border-color: #ff9600;
+  color: #ff9600;
+}
+
+.touch-btn-turbo.cooling {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.touch-btn-turbo.cooling::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: calc(var(--cooldown-ratio, 0) * 100%);
+  background: rgba(255, 238, 0, 0.25);
+  pointer-events: none;
+}
+
 /* ---------------------------------------------------------------
    Game-Over overlay
    --------------------------------------------------------------- */
