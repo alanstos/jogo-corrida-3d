@@ -25,13 +25,6 @@ export default class Car {
       if (this._onCollide) this._onCollide(event);
     });
 
-    // Diagnostic — verify mass, type, allowSleep before any input is wired
-    // PITFALLS #4: mass=0 -> static, type=2. Expected: mass=150, type=1 (DYNAMIC), allowSleep=false
-    console.log('Car init:', {
-      mass: this.body.mass,
-      type: this.body.type,
-      allowSleep: this.body.allowSleep,
-    });
   }
 
   /**
