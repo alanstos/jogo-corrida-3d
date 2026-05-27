@@ -6,6 +6,7 @@ import Track from './Track.js';
 import Camera from './Camera.js';
 import HUD from './HUD.js';
 import ParticleSystem from './ParticleSystem.js';
+import { vibrate } from './Haptic.js';
 import { safeGet, safeSet } from './Storage.js';
 
 const TURBO_DURATION = 2.0;  // seconds of boost
@@ -161,6 +162,7 @@ export default class Game {
       );
       this.particleSystem.burst(impactPos);
       this.camera.startShake();
+      vibrate([100]);
 
       this.state = 'GAME_OVER';
 
@@ -274,6 +276,7 @@ export default class Game {
     if (intent.turbo && this._turboState === 'idle' && this.state === 'PLAYING') {
       this._turboState = 'boosting';
       this._turboTimer = TURBO_DURATION;
+      vibrate([50]);
     }
     if (this._turboState === 'boosting') {
       this._turboTimer -= safeDt;
