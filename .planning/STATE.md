@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: content-and-polish
-status: planning
+status: roadmap_defined
 last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 -- Milestone v2.0 started — defining requirements
+last_activity: 2026-05-27 -- Requirements (10) + Roadmap (Phases 3-7, 21 plans) defined
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 21
   completed_plans: 0
   percent: 0
 ---
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 3 — Game Feel (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-27 — Milestone v2.0 started
+Status: Roadmap defined — ready to execute Phase 3
+Last activity: 2026-05-27 — Requirements + Roadmap defined
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░] 0% (0/21 plans)
 
 ## Accumulated Context
 
@@ -37,6 +37,7 @@ Progress: [░░░░░░░░░░] 0%
 
 - v1.0: Todas as decisões documentadas em PROJECT.md Key Decisions table
 - v2.0: Fase 3 usa pool de segmentos para memória constante (PROG-02) — diferente de Fase 1 que usa pool reciclado por z-position
+- v2.0: Carros inimigos usam posicionamento cinemático (sem Cannon-es bodies) para economizar physics budget
 
 ### Pending Todos
 
@@ -44,7 +45,7 @@ None.
 
 ### Blockers/Concerns
 
-- Tech debt: console.log periódico em `Game.js` L276 (~1 log/s em produção) — remover no início de v2.0
+- Tech debt: console.log periódico em `Game.js` L276 (~1 log/s em produção) — plano 03-01 cobre este item
 
 ## Deferred Items
 
@@ -52,10 +53,12 @@ None.
 |----------|------|--------|-------------|
 | v3 | Multiplayer | out-of-scope | Init |
 | v3 | IAP / monetização | out-of-scope | Init |
+| v3 | Fase 4+ (além de 3 pistas) | out-of-scope | v2.0 planning |
+| v3 | BGM / música de fundo | out-of-scope | v2.0 planning |
 
 ## Session Continuity
 
 Last session: 2026-05-27T00:00:00.000Z
-Stopped at: Milestone v2.0 iniciado — aguardando definição de requirements e roadmap
+Stopped at: v2.0 roadmap completo — 10 requirements, 5 phases (3-7), 21 plans
 Resume file: —
-Next action: definir REQUIREMENTS.md → /gsd-plan-phase 3
+Next action: /gsd-plan-phase 3
