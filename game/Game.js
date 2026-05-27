@@ -5,6 +5,7 @@ import Controls from './Controls.js';
 import Track from './Track.js';
 import Camera from './Camera.js';
 import HUD from './HUD.js';
+import ParticleSystem from './ParticleSystem.js';
 import { safeGet, safeSet } from './Storage.js';
 
 const TURBO_DURATION = 2.0;  // seconds of boost
@@ -61,6 +62,9 @@ export default class Game {
 
     // --- HUD ---
     this.hud = new HUD();
+
+    // --- Particle system --- must exist before collision handler is wired
+    this.particleSystem = new ParticleSystem(this.scene);
 
     // --- Wire collision handler ---
     this.car.onCollide((event) => this._handleCarCollision(event));
@@ -147,6 +151,16 @@ export default class Game {
       event.body.userData &&
       event.body.userData.tag === 'obstacle'
     ) {
+      // Derive world-space impact position — extract contact values IMMEDIATELY
+      // (event.contact is pooled and reused by cannon-es on the next collision)
+      const ri = event.contact?.ri;
+      const impactPos = new THREE.Vector3(
+        this.car.body.position.x + (ri?.x ?? 0),
+        this.car.body.position.y + (ri?.y ?? 0),
+        this.car.body.position.z + (ri?.z ?? 0),
+      );
+      this.particleSystem.burst(impactPos);
+
       this.state = 'GAME_OVER';
 
       const finalScore = Math.floor(this.score);
@@ -212,6 +226,7 @@ export default class Game {
     this.score = 0;
     this._turboState = 'idle';
     this._turboTimer = 0;
+    this.particleSystem.reset();
 
     this._lastTime = performance.now();
     this.state = 'PLAYING';
@@ -280,6 +295,9 @@ export default class Game {
 
     // Step 9
     this.car.syncMesh();
+
+    // Step 9.5 — Particle update (AFTER syncMesh, before render)
+    this.particleSystem.update(safeDt);
 
     // Score
     this.score = this.track.getDistanceTraveled() * 0.5;
