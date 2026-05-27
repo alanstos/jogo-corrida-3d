@@ -160,6 +160,7 @@ export default class Game {
         this.car.body.position.z + (ri?.z ?? 0),
       );
       this.particleSystem.burst(impactPos);
+      this.camera.startShake();
 
       this.state = 'GAME_OVER';
 
