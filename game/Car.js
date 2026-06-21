@@ -78,12 +78,53 @@ export default class Car {
   }
 
   _buildMesh() {
-    // Cyan neon car mesh — MeshLambertMaterial (no PBR, PERF-03)
     const group = new THREE.Group();
-    const geo = new THREE.BoxGeometry(1.8, 0.8, 4.0);
-    const mat = new THREE.MeshLambertMaterial({ color: 0x00ffff });
-    const bodyMesh = new THREE.Mesh(geo, mat);
-    group.add(bodyMesh);
+
+    // Chassi (corpo principal)
+    group.add(new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 0.8, 4.0),
+      new THREE.MeshLambertMaterial({ color: 0x00ffff })
+    ));
+
+    // Cabine (teto) — deslocada levemente para a frente (-Z)
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(1.4, 0.5, 2.0),
+      new THREE.MeshLambertMaterial({ color: 0x0099aa })
+    );
+    cabin.position.set(0, 0.65, -0.3);
+    group.add(cabin);
+
+    // Rodas (4×) — CylinderGeometry eixo-Y, rotacionado para eixo-X via rotation.z = π/2
+    const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 8);
+    const wheelMat = new THREE.MeshLambertMaterial({ color: 0x222233 });
+    for (const [x, y, z] of [
+      [-1.05, -0.25, -1.5], [1.05, -0.25, -1.5],
+      [-1.05, -0.25,  1.5], [1.05, -0.25,  1.5],
+    ]) {
+      const w = new THREE.Mesh(wheelGeo, wheelMat);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(x, y, z);
+      group.add(w);
+    }
+
+    // Faróis frontais (frente = -Z)
+    const hlGeo = new THREE.BoxGeometry(0.35, 0.18, 0.08);
+    const hlMat = new THREE.MeshLambertMaterial({ color: 0xffee00, emissive: 0xffee00, emissiveIntensity: 0.7 });
+    for (const x of [-0.55, 0.55]) {
+      const hl = new THREE.Mesh(hlGeo, hlMat);
+      hl.position.set(x, 0.05, -2.02);
+      group.add(hl);
+    }
+
+    // Lanternas traseiras (traseira = +Z)
+    const tlGeo = new THREE.BoxGeometry(0.5, 0.12, 0.08);
+    const tlMat = new THREE.MeshLambertMaterial({ color: 0xff2255, emissive: 0xff2255, emissiveIntensity: 0.5 });
+    for (const x of [-0.55, 0.55]) {
+      const tl = new THREE.Mesh(tlGeo, tlMat);
+      tl.position.set(x, 0.05, 2.02);
+      group.add(tl);
+    }
+
     return group;
   }
 
